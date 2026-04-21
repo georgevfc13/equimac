@@ -22,12 +22,10 @@ class InventarioController {
     public function listar() {
         $filtro = $_GET['buscar'] ?? null;
         $productos = $this->modelo->obtenerTodos($filtro);
-        $categorias = $this->modelo->obtenerCategorias();
         $estadisticas = $this->modelo->obtenerEstadisticas();
 
         $this->renderizar('views/lista.php', [
             'productos' => $productos,
-            'categorias' => $categorias,
             'estadisticas' => $estadisticas,
             'filtro' => $filtro,
             'mensaje' => $this->mensaje,
@@ -36,7 +34,42 @@ class InventarioController {
     }
 
     /**
-     * Acción: Mostrar formulario para crear producto
+     * Acción: Ver detalles completos de un producto
+     */
+    public function detalles() {
+        $id = $_GET['id'] ?? null;
+
+        if (!$id) {
+            $this->mensaje = 'ID de producto inválido';
+            $this->tipo_mensaje = 'error';
+            return $this->listar();
+        }
+
+        $producto = $this->modelo->obtenerPorId($id);
+        if (!$producto) {
+            $this->mensaje = 'Producto no encontrado';
+            $this->tipo_mensaje = 'error';
+            return $this->listar();
+        }
+
+        // Obtener información del estante
+        $estante = $this->modelo->obtenerEstante($producto['estante']);
+        
+        // Obtener productos en la misma ubicación
+        $productosEnUbicacion = $this->modelo->obtenerProductosPorUbicacion(
+            $producto['estante'],
+            $producto['entrepaño']
+        );
+
+        $this->renderizar('views/detalles.php', [
+            'producto' => $producto,
+            'estante' => $estante,
+            'productosEnUbicacion' => $productosEnUbicacion
+        ]);
+    }
+
+    /**
+     * Acción: Mostrar formulario para crear o editar producto
      */
     public function formulario() {
         $id = $_GET['id'] ?? null;
@@ -51,11 +84,17 @@ class InventarioController {
             }
         }
 
-        $categorias = $this->modelo->obtenerCategorias();
+        $estantes = $this->modelo->obtenerEstantes();
+        $unidades = $this->modelo->obtenerUnidades();
+        $marcas = $this->modelo->obtenerMarcas();
+        $tipos_maquinaria = $this->modelo->obtenerTiposMaquinaria();
 
         $this->renderizar('views/formulario.php', [
             'producto' => $producto,
-            'categorias' => $categorias,
+            'estantes' => $estantes,
+            'unidades' => $unidades,
+            'marcas' => $marcas,
+            'tipos_maquinaria' => $tipos_maquinaria,
             'es_edicion' => $id !== null
         ]);
     }
@@ -71,15 +110,19 @@ class InventarioController {
 
         $id = $_POST['id'] ?? null;
         $codigo = trim($_POST['codigo'] ?? '');
-        $nombre = trim($_POST['nombre'] ?? '');
         $descripcion = trim($_POST['descripcion'] ?? '');
+        $unidad = trim($_POST['unidad'] ?? '');
         $cantidad = intval($_POST['cantidad'] ?? 0);
-        $precio_unitario = floatval($_POST['precio_unitario'] ?? 0);
-        $categoria = trim($_POST['categoria'] ?? '');
-        $estado = $_POST['estado'] ?? 'activo';
+        $marca = trim($_POST['marca'] ?? '') ?: null;
+        $equipo = trim($_POST['equipo'] ?? '') ?: null;
+        $aplicacion = trim($_POST['aplicacion'] ?? '') ?: null;
+        $estante = intval($_POST['estante'] ?? 0);
+        $entrepaño = intval($_POST['entrepaño'] ?? 0);
+        $estado = trim($_POST['estado'] ?? '') ?: null;
+        $tipo_maquinaria = trim($_POST['tipo_maquinaria'] ?? '') ?: null;
 
         // Validaciones
-        $errores = $this->validar($codigo, $nombre, $cantidad, $precio_unitario, $id);
+        $errores = $this->validar($codigo, $descripcion, $unidad, $cantidad, $estante, $entrepaño, $id);
 
         if (!empty($errores)) {
             $this->mensaje = implode('<br>', $errores);
@@ -96,12 +139,16 @@ class InventarioController {
 
         $datos = [
             'codigo' => $codigo,
-            'nombre' => $nombre,
             'descripcion' => $descripcion,
+            'unidad' => $unidad,
             'cantidad' => $cantidad,
-            'precio_unitario' => $precio_unitario,
-            'categoria' => $categoria,
-            'estado' => $estado
+            'marca' => $marca,
+            'equipo' => $equipo,
+            'aplicacion' => $aplicacion,
+            'estante' => $estante,
+            'entrepaño' => $entrepaño,
+            'estado' => $estado,
+            'tipo_maquinaria' => $tipo_maquinaria
         ];
 
         if ($id) {
@@ -148,7 +195,7 @@ class InventarioController {
             $this->mensaje = 'Error: ' . $resultado['error'];
             $this->tipo_mensaje = 'error';
         } else {
-            $this->mensaje = "Producto '{$producto['nombre']}' eliminado";
+            $this->mensaje = "Producto '{$producto['descripcion']}' eliminado";
             $this->tipo_mensaje = 'exito';
         }
 
@@ -158,23 +205,31 @@ class InventarioController {
     /**
      * Validar datos del formulario
      */
-    private function validar($codigo, $nombre, $cantidad, $precio_unitario, $id = null) {
+    private function validar($codigo, $descripcion, $unidad, $cantidad, $estante, $entrepaño, $id = null) {
         $errores = [];
 
         if (empty($codigo)) {
             $errores[] = '✗ El código es requerido';
         }
 
-        if (empty($nombre)) {
-            $errores[] = '✗ El nombre es requerido';
+        if (empty($descripcion)) {
+            $errores[] = '✗ La descripción es requerida';
+        }
+
+        if (empty($unidad)) {
+            $errores[] = '✗ La unidad es requerida';
         }
 
         if ($cantidad < 0) {
             $errores[] = '✗ La cantidad no puede ser negativa';
         }
 
-        if ($precio_unitario < 0) {
-            $errores[] = '✗ El precio no puede ser negativo';
+        if ($estante <= 0) {
+            $errores[] = '✗ Debe seleccionar un estante';
+        }
+
+        if ($entrepaño <= 0) {
+            $errores[] = '✗ Debe seleccionar un entrepaño';
         }
 
         return $errores;

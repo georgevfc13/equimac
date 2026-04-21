@@ -10,6 +10,7 @@ require_once __DIR__ . '/../config/database.php';
 class Inventario {
     private $db;
     private $table = 'inventario';
+    private $table_estantes = 'estantes';
 
     public function __construct() {
         $this->db = getDB();
@@ -20,8 +21,8 @@ class Inventario {
      */
     public function crear($datos) {
         $sql = "INSERT INTO {$this->table} 
-                (codigo, nombre, descripcion, cantidad, precio_unitario, categoria, estado) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+                (codigo, descripcion, unidad, cantidad, marca, equipo, aplicacion, estante, entrepaño, estado, tipo_maquinaria) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
         if (!$stmt) {
@@ -29,14 +30,18 @@ class Inventario {
         }
 
         $resultado = $stmt->bind_param(
-            'sssidss',
+            'sssisssiiis',
             $datos['codigo'],
-            $datos['nombre'],
             $datos['descripcion'],
+            $datos['unidad'],
             $datos['cantidad'],
-            $datos['precio_unitario'],
-            $datos['categoria'],
-            $datos['estado']
+            $datos['marca'],
+            $datos['equipo'],
+            $datos['aplicacion'],
+            $datos['estante'],
+            $datos['entrepaño'],
+            $datos['estado'],
+            $datos['tipo_maquinaria']
         );
 
         if (!$resultado || !$stmt->execute()) {
@@ -54,10 +59,10 @@ class Inventario {
         $sql = "SELECT * FROM {$this->table}";
 
         if ($filtro) {
-            $sql .= " WHERE nombre LIKE ? OR codigo LIKE ? OR categoria LIKE ?";
+            $sql .= " WHERE codigo LIKE ? OR descripcion LIKE ? OR marca LIKE ? OR equipo LIKE ?";
         }
 
-        $sql .= " ORDER BY fecha_creacion DESC";
+        $sql .= " ORDER BY estante ASC, entrepaño ASC, codigo ASC";
 
         $stmt = $this->db->prepare($sql);
         if (!$stmt) {
@@ -66,7 +71,7 @@ class Inventario {
 
         if ($filtro) {
             $busqueda = "%{$filtro}%";
-            $stmt->bind_param('sss', $busqueda, $busqueda, $busqueda);
+            $stmt->bind_param('ssss', $busqueda, $busqueda, $busqueda, $busqueda);
         }
 
         $stmt->execute();
@@ -106,8 +111,9 @@ class Inventario {
      */
     public function actualizar($id, $datos) {
         $sql = "UPDATE {$this->table} 
-                SET nombre = ?, descripcion = ?, cantidad = ?, 
-                    precio_unitario = ?, categoria = ?, estado = ?
+                SET descripcion = ?, unidad = ?, cantidad = ?, marca = ?, 
+                    equipo = ?, aplicacion = ?, estante = ?, entrepaño = ?, 
+                    estado = ?, tipo_maquinaria = ?
                 WHERE id = ?";
 
         $stmt = $this->db->prepare($sql);
@@ -116,13 +122,17 @@ class Inventario {
         }
 
         $resultado = $stmt->bind_param(
-            'sssidsi',
-            $datos['nombre'],
+            'sssisssiiis',
             $datos['descripcion'],
+            $datos['unidad'],
             $datos['cantidad'],
-            $datos['precio_unitario'],
-            $datos['categoria'],
+            $datos['marca'],
+            $datos['equipo'],
+            $datos['aplicacion'],
+            $datos['estante'],
+            $datos['entrepaño'],
             $datos['estado'],
+            $datos['tipo_maquinaria'],
             $id
         );
 
@@ -155,21 +165,81 @@ class Inventario {
     }
 
     /**
-     * Obtener categorías únicas
+     * Obtener todas las marcas únicas
      */
-    public function obtenerCategorias() {
-        $sql = "SELECT DISTINCT categoria FROM {$this->table} 
-                WHERE categoria IS NOT NULL AND categoria != '' 
-                ORDER BY categoria ASC";
+    public function obtenerMarcas() {
+        $sql = "SELECT DISTINCT marca FROM {$this->table} 
+                WHERE marca IS NOT NULL AND marca != '' 
+                ORDER BY marca ASC";
 
         $resultado = $this->db->query($sql);
-        $categorias = [];
+        $marcas = [];
 
         while ($fila = $resultado->fetch_assoc()) {
-            $categorias[] = $fila['categoria'];
+            $marcas[] = $fila['marca'];
         }
 
-        return $categorias;
+        return $marcas;
+    }
+
+    /**
+     * Obtener todos los tipos de máquinaria
+     */
+    public function obtenerTiposMaquinaria() {
+        $sql = "SELECT DISTINCT tipo_maquinaria FROM {$this->table} 
+                WHERE tipo_maquinaria IS NOT NULL AND tipo_maquinaria != '' 
+                ORDER BY tipo_maquinaria ASC";
+
+        $resultado = $this->db->query($sql);
+        $tipos = [];
+
+        while ($fila = $resultado->fetch_assoc()) {
+            $tipos[] = $fila['tipo_maquinaria'];
+        }
+
+        return $tipos;
+    }
+
+    /**
+     * Obtener todas las unidades de medida
+     */
+    public function obtenerUnidades() {
+        $unidades = ['Pieza', 'Unidad', 'Metro', 'Kilogramo', 'Litro', 'Caja', 'Paquete', 'Rollo', 'Bobina', 'Set'];
+        return $unidades;
+    }
+
+    /**
+     * Obtener todos los estantes
+     */
+    public function obtenerEstantes() {
+        $sql = "SELECT * FROM {$this->table_estantes} ORDER BY numero ASC";
+        $resultado = $this->db->query($sql);
+        $estantes = [];
+
+        while ($fila = $resultado->fetch_assoc()) {
+            $estantes[] = $fila;
+        }
+
+        return $estantes;
+    }
+
+    /**
+     * Obtener un estante por número
+     */
+    public function obtenerEstante($numero) {
+        $sql = "SELECT * FROM {$this->table_estantes} WHERE numero = ?";
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('i', $numero);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $estante = $resultado->fetch_assoc();
+        $stmt->close();
+
+        return $estante;
     }
 
     /**
@@ -179,12 +249,36 @@ class Inventario {
         $sql = "SELECT 
                 COUNT(*) as total_productos,
                 SUM(cantidad) as cantidad_total,
-                SUM(cantidad * precio_unitario) as valor_total,
-                AVG(precio_unitario) as precio_promedio
-                FROM {$this->table} WHERE estado = 'activo'";
+                COUNT(DISTINCT estante) as total_estantes,
+                COUNT(DISTINCT marca) as total_marcas
+                FROM {$this->table}";
 
         $resultado = $this->db->query($sql);
         return $resultado->fetch_assoc();
+    }
+
+    /**
+     * Obtener productos por estante y entrepaño
+     */
+    public function obtenerProductosPorUbicacion($estante, $entrepaño) {
+        $sql = "SELECT * FROM {$this->table} WHERE estante = ? AND entrepaño = ? ORDER BY codigo ASC";
+
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('ii', $estante, $entrepaño);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $productos = [];
+
+        while ($fila = $resultado->fetch_assoc()) {
+            $productos[] = $fila;
+        }
+
+        $stmt->close();
+        return $productos;
     }
 
     /**

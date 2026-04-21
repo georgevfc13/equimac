@@ -8,28 +8,33 @@ USE equimac;
 
 -- Tabla de Inventario
 CREATE TABLE IF NOT EXISTS inventario (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo VARCHAR(50) UNIQUE NOT NULL,
-    nombre VARCHAR(150) NOT NULL,
-    descripcion TEXT,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255) NOT NULL,
+    unidad VARCHAR(50) NOT NULL,
     cantidad INT NOT NULL DEFAULT 0,
-    precio_unitario DECIMAL(10, 2) NOT NULL,
-    categoria VARCHAR(100),
-    estado ENUM('activo', 'inactivo', 'descontinuado') DEFAULT 'activo',
+    marca VARCHAR(100),
+    equipo VARCHAR(100),
+    aplicacion VARCHAR(100),
+    estante INT NOT NULL,
+    entrepaño INT NOT NULL,
+    estado VARCHAR(50),
+    tipo_maquinaria VARCHAR(100),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_codigo (codigo),
+    INDEX idx_estante_entrepaño (estante, entrepaño),
+    INDEX idx_marca (marca),
+    INDEX idx_equipo (equipo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Índices para mejorar búsquedas
-CREATE INDEX idx_codigo ON inventario(codigo);
-CREATE INDEX idx_nombre ON inventario(nombre);
-CREATE INDEX idx_categoria ON inventario(categoria);
-CREATE INDEX idx_estado ON inventario(estado);
-
--- Datos de ejemplo
-INSERT INTO inventario (codigo, nombre, descripcion, cantidad, precio_unitario, categoria, estado) VALUES
-('EQ-001', 'Motor Eléctrico 1HP', 'Motor eléctrico trifásico 1HP', 15, 450.00, 'Motores', 'activo'),
-('EQ-002', 'Bomba Hidráulica', 'Bomba centrífuga 2HP', 8, 850.00, 'Bombas', 'activo'),
-('EQ-003', 'Compresor de Aire', 'Compresor de tornillo 5HP', 3, 2500.00, 'Compresores', 'activo'),
-('EQ-004', 'Válvula de Control', 'Válvula solenoide 2"', 45, 120.00, 'Válvulas', 'activo'),
-('EQ-005', 'Tubo PVC', 'Tubo PVC 2" x 3m', 120, 25.00, 'Tuberías', 'activo');
+ 
+-- Tabla de Estantes (configuración)
+CREATE TABLE IF NOT EXISTS estantes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero INT NOT NULL UNIQUE,
+    filas INT NOT NULL DEFAULT 5,
+    columnas INT NOT NULL DEFAULT 4,
+    descripcion VARCHAR(255),
+    ubicacion VARCHAR(100),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
