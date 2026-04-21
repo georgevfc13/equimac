@@ -54,6 +54,14 @@ try {
             $controlador->eliminar();
             break;
 
+        case 'estantes':
+            $controlador->estantes();
+            break;
+
+        case 'agregar_a_posicion':
+            $controlador->agregar_a_posicion();
+            break;
+
         default:
             // Acción por defecto
             $controlador->listar();
