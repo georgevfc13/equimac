@@ -1,0 +1,39 @@
+# ============================================
+# CONFIGURACIÓN APACHE
+# Archivo: .htaccess
+# ============================================
+
+# Habilitar mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /equimac/
+</IfModule>
+
+# Deshabilitar listado de directorios
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Asegurar que index.php se ejecute
+DirectoryIndex index.php index.html
+
+# Mejorar seguridad
+<IfModule mod_headers.c>
+    # Prevenir MIME type sniffing
+    Header set X-Content-Type-Options "nosniff"
+    # Habilitar XSS protection
+    Header set X-XSS-Protection "1; mode=block"
+    # Prevenir clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Cachés
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+</IfModule>

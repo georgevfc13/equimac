@@ -1,0 +1,502 @@
+================================================================================
+SISTEMA DE INVENTARIO EQUIMAC - ESTRUCTURA COMPLETA
+================================================================================
+
+📁 DIRECTORIO RAÍZ: C:\xampp\htdocs\equimac\
+
+================================================================================
+ÁRBOL DE CARPETAS Y ARCHIVOS
+================================================================================
+
+equimac/
+│
+├── 📄 index.php                    ← PUNTO DE ENTRADA (Enrutador MVC)
+├── 📄 diagnostico.php             ← Verificar instalación
+├── 📄 utils.php                   ← Funciones utilitarias
+├── 📄 database.sql                ← Script SQL para crear BD
+│
+├── 📖 README.md                   ← Documentación completa
+├── 📖 QUICKSTART.md               ← Inicio rápido
+├── 📖 ARQUITECTURA.md             ← Explicación MVC
+├── 📖 ESTRUCTURA_COMPLETA.txt     ← Este archivo
+│
+├── 🔑 .htaccess                   ← Configuración Apache
+├── 🔑 .gitignore                  ← Ignorar archivos Git
+│
+├─ 📂 config/
+│  ├── 📄 database.php             ← Conexión a BD (Singleton)
+│  └── 📄 index.php                ← Protección contra acceso directo
+│
+├─ 📂 models/
+│  ├── 📄 Inventario.php           ← Modelo (CRUD y queries)
+│  └── 📄 index.php                ← Protección contra acceso directo
+│
+├─ 📂 controllers/
+│  ├── 📄 InventarioController.php ← Controlador (lógica de negocio)
+│  └── 📄 index.php                ← Protección contra acceso directo
+│
+├─ 📂 views/
+│  ├── 📄 layout.php               ← HTML base (navbar, footer, layout)
+│  ├── 📄 lista.php                ← Vista: Listado de productos
+│  ├── 📄 formulario.php           ← Vista: Formulario crear/editar
+│  └── 📄 index.php                ← Protección contra acceso directo
+│
+├─ 📂 public/
+│  ├─ 📂 css/
+│  │  └── 📄 style.css             ← Estilos completos (responsive)
+│  │
+│  └─ 📂 js/
+│     └── 📄 script.js             ← Scripts JavaScript (validación, interacción)
+│
+└─ 📂 logs/
+   └── 📄 index.php                ← Protección contra acceso directo
+   └── 📄 sistema.log              ← Se genera automáticamente
+
+================================================================================
+DESCRIPCIÓN DE CADA ARCHIVO
+================================================================================
+
+🔴 ARCHIVOS PRINCIPALES (Root)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. index.php
+   - Archivo principal de entrada
+   - Enrutador que dirige a acciones del controlador
+   - Carga configuración y controlador
+   - Maneja errores globales
+
+2. diagnostico.php
+   - Verifica que todo esté instalado correctamente
+   - Muestra información del servidor
+   - Prueba conexión a BD
+   - Recomendaciones de configuración
+
+3. utils.php
+   - Funciones utilitarias compartidas
+   - Formateo de moneda y fechas
+   - Sanitización de entrada
+   - Funciones helper
+
+4. database.sql
+   - Script SQL para crear BD
+   - Define tabla 'inventario'
+   - Incluye datos de ejemplo
+   - Crea índices para búsquedas
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟠 DOCUMENTACIÓN (Root)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. README.md
+   - Guía completa de instalación
+   - Requisitos previos
+   - Instrucciones paso a paso
+   - Solución de problemas
+   - Explicación de stack tecnológico
+
+2. QUICKSTART.md
+   - Inicio rápido (5 pasos)
+   - Resumen de estructura
+   - URLs importantes
+   - Comandos útiles
+
+3. ARQUITECTURA.md
+   - Explicación detallada MVC
+   - Diagramas de flujo
+   - Responsabilidades de cada componente
+   - Patrones de diseño utilizados
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟡 CONFIGURACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. .htaccess
+   - Configuración Apache
+   - Reescritura de URLs (preparado)
+   - Seguridad headers
+   - Control de caché
+
+2. .gitignore
+   - Archivos a ignorar en Git
+   - Logs, backups, archivos temporales
+   - Credenciales locales
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 MODEL LAYER (config/ + models/)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+config/database.php
+├── Define credenciales (HOST, USER, PASSWORD, DB)
+├── Clase Database (Singleton)
+├── Conexión MySQLi
+├── Método getInstance() para instancia única
+└── Función helper getDB()
+
+models/Inventario.php
+├── Métodos CRUD
+│  ├── crear($datos) → INSERT
+│  ├── obtenerTodos($filtro) → SELECT *
+│  ├── obtenerPorId($id) → SELECT WHERE
+│  ├── actualizar($id, $datos) → UPDATE
+│  ├── eliminar($id) → DELETE
+│  └── obtenerCategorias() → SELECT DISTINCT
+│
+├── Métodos auxiliares
+│  ├── obtenerEstadisticas() → Resumen BD
+│  ├── codigoExiste($codigo) → Validar unicidad
+│  └── Prepared statements en todos
+│
+└── Características
+   ├── Seguridad: Sin SQL Injection
+   ├── Type binding
+   └── Manejo de errores
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 CONTROLLER LAYER (controllers/)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+InventarioController.php
+├── Métodos de acción
+│  ├── listar() → Mostrar productos
+│  ├── formulario() → Mostrar formulario
+│  ├── guardar() → Crear/Actualizar
+│  ├── eliminar() → Borrar producto
+│  └── validar() → Validar entrada
+│
+├── Flujo para cada acción
+│  ├── Obtener parámetros
+│  ├── Validar (cliente + servidor)
+│  ├── Llamar modelo
+│  ├── Preparar datos
+│  └── Renderizar vista
+│
+└── Responsabilidades
+   ├── NO hace queries directas
+   ├── NO renderiza HTML directo
+   └── Orquesta Model y View
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⭐ VIEW LAYER (views/)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+layout.php
+├── HTML base de la aplicación
+├── Navbar con logo y menú
+├── Sistema de alertas/mensajes
+├── Footer
+├── Incluye CSS y JS
+└── Estructura para renderizar otras vistas
+
+lista.php
+├── Tabla de inventario
+├── Tarjetas con estadísticas
+├── Buscador con filtro
+├── Botones de acción (editar/eliminar)
+├── Manejo de resultados vacíos
+└── Links a formulario
+
+formulario.php
+├── Formulario para crear/editar
+├── Campos: código, nombre, descripción
+├── Campos: cantidad, precio, categoría, estado
+├── Validación en cliente con JavaScript
+├── Botones: Guardar, Volver
+└── Info y recomendaciones
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 ASSETS (public/)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+css/style.css (1000+ líneas)
+├── Variables CSS personalizadas
+├── Estilos globales
+├── Navbar responsive
+├── Sistema de alertas
+├── Estilos de botones
+├── Tabla con hover effects
+├── Formularios
+├── Badges y estados
+├── Responsive design (768px, 480px breakpoints)
+└── Animaciones suaves
+
+js/script.js (400+ líneas)
+├── Confirmación antes de eliminar
+├── Validación de formularios
+├── Cierre automático de alertas
+├── Búsqueda en tiempo real
+├── Formateo de moneda
+├── Exportar tabla a CSV
+├── Imprimir tabla
+├── Validaciones de entrada
+└── Funciones helper
+
+================================================================================
+FLUJO MVC EN ACCIÓN
+================================================================================
+
+CREAR NUEVO PRODUCTO:
+━━━━━━━━━━━━━━━━━━━━━━
+
+1. Usuario hace clic en "+ Nuevo Producto"
+   └─ Navega a: index.php?accion=formulario
+
+2. index.php (ENRUTADOR)
+   └─ Identifica acción "formulario"
+   └─ Instancia InventarioController
+
+3. InventarioController::formulario()
+   ├─ Obtiene categorías del Modelo
+   ├─ Renderiza views/formulario.php
+   └─ Usuario completa formulario
+
+4. Usuario envía formulario
+   └─ POST a: index.php?accion=guardar
+
+5. index.php (ENRUTADOR)
+   └─ Identifica acción "guardar"
+
+6. InventarioController::guardar()
+   ├─ Obtiene datos de $_POST
+   ├─ Valida entrada
+   ├─ Verifica código único
+   └─ Llama Inventario::crear($datos)
+
+7. Inventario::crear() (MODELO)
+   ├─ Prepara INSERT query
+   ├─ Ejecuta con MySQLi
+   └─ Retorna resultado
+
+8. InventarioController (continúa)
+   ├─ Renderiza views/lista.php
+   ├─ Pasa productos actualizados
+   └─ Muestra mensaje "Éxito"
+
+9. Navegador
+   └─ Muestra tabla con nuevo producto
+
+EDITAR PRODUCTO:
+━━━━━━━━━━━━━━━
+
+Similar a crear, pero:
+├─ InventarioController::formulario() también trae producto existente
+├─ InventarioController::guardar() llama actualizar() en lugar de crear()
+└─ Código no se puede editar
+
+ELIMINAR PRODUCTO:
+━━━━━━━━━━━━━━━━
+
+1. Usuario hace clic en "🗑 Eliminar"
+   └─ Confirma acción en prompt()
+
+2. Navega a: index.php?accion=eliminar&id=1
+
+3. InventarioController::eliminar()
+   ├─ Obtiene id de $_GET
+   ├─ Llama Inventario::eliminar($id)
+   └─ Renderiza lista actualizada
+
+4. Producto desaparece de tabla
+
+================================================================================
+FUNCIONALIDADES IMPLEMENTADAS
+================================================================================
+
+✅ CRUD Completo
+   ├─ CREATE: Crear nuevos productos
+   ├─ READ: Listar y filtrar productos
+   ├─ UPDATE: Editar productos existentes
+   └─ DELETE: Eliminar productos
+
+✅ Búsqueda y Filtros
+   ├─ Búsqueda por código
+   ├─ Búsqueda por nombre
+   ├─ Búsqueda por categoría
+   └─ Búsqueda en tiempo real
+
+✅ Validaciones
+   ├─ Cliente: JavaScript validaciones
+   ├─ Servidor: PHP validaciones
+   ├─ Código único
+   ├─ Campos requeridos
+   ├─ Tipos de datos
+   └─ Rango de valores
+
+✅ Seguridad
+   ├─ Prepared statements
+   ├─ SQL Injection prevention
+   ├─ Sanitización de entrada
+   ├─ Escapado de salida HTML
+   └─ Prevención de acceso directo a carpetas
+
+✅ Estadísticas
+   ├─ Total de productos
+   ├─ Cantidad total en inventario
+   ├─ Valor total del inventario
+   └─ Precio promedio
+
+✅ Diseño Responsive
+   ├─ Desktop (> 1024px)
+   ├─ Tablet (768px - 1024px)
+   └─ Móvil (< 768px)
+
+✅ UX Mejorada
+   ├─ Alertas automáticas
+   ├─ Confirmación antes de eliminar
+   ├─ Mensajes de éxito/error
+   ├─ Tabla con hover effects
+   ├─ Iconos descriptivos
+   └─ Loading states
+
+================================================================================
+CÓMO INICIARSE
+================================================================================
+
+1. INSTALAR XAMPP
+   Descargar: https://www.apachefriends.org/es/
+
+2. INICIAR SERVICIOS
+   - Abre XAMPP Control Panel
+   - Click Start en Apache
+   - Click Start en MySQL
+
+3. CREAR BASE DE DATOS
+   - Ve a: http://localhost/phpmyadmin
+   - Crea BD: equimac
+   - Ejecuta script: database.sql
+
+4. ACCEDER AL SISTEMA
+   - Navegador: http://localhost/equimac
+
+5. VERIFICAR INSTALACIÓN
+   - Acceder a: http://localhost/equimac/diagnostico.php
+
+================================================================================
+STACK TECNOLÓGICO
+================================================================================
+
+Backend:
+├─ PHP 7.4+ (Lenguaje principal)
+├─ MySQLi (Acceso a BD)
+└─ HTML5, CSS3, JavaScript (Frontend)
+
+Base de Datos:
+├─ MySQL 5.7+
+├─ InnoDB (Motor de almacenamiento)
+└─ UTF-8 (Charset)
+
+Servidor Local:
+├─ Apache (Servidor web)
+└─ XAMPP (Stack integrado)
+
+Navegadores Soportados:
+├─ Chrome 90+
+├─ Firefox 88+
+├─ Safari 14+
+└─ Edge 90+
+
+================================================================================
+ESTRUCTURA DE LA BD
+================================================================================
+
+Tabla: inventario
+
+Campos:
+├─ id (INT, PK, AUTO_INCREMENT)
+├─ codigo (VARCHAR 50, UNIQUE) ← Identificador del producto
+├─ nombre (VARCHAR 150, NOT NULL)
+├─ descripcion (TEXT)
+├─ cantidad (INT, DEFAULT 0)
+├─ precio_unitario (DECIMAL 10,2, NOT NULL)
+├─ categoria (VARCHAR 100)
+├─ estado (ENUM: activo, inactivo, descontinuado)
+├─ fecha_creacion (TIMESTAMP DEFAULT CURRENT)
+└─ fecha_actualizacion (TIMESTAMP ON UPDATE)
+
+Índices:
+├─ PRIMARY KEY (id)
+├─ UNIQUE KEY (codigo)
+├─ INDEX (codigo)
+├─ INDEX (nombre)
+├─ INDEX (categoria)
+└─ INDEX (estado)
+
+================================================================================
+ARCHIVOS A EDITAR EN PRODUCCIÓN
+================================================================================
+
+config/database.php:
+└─ Cambiar credenciales
+   ├─ DB_USER
+   ├─ DB_PASSWORD
+   ├─ Usar host remoto en lugar de localhost
+
+.htaccess:
+├─ Habilitar HTTPS
+├─ Reescrituras más estrictas
+
+index.php:
+├─ Cambiar display_errors a 0
+├─ Implementar error logging
+
+diagnostico.php:
+└─ ELIMINAR antes de producción (riesgo de seguridad)
+
+================================================================================
+PRÓXIMAS MEJORAS SUGERIDAS
+================================================================================
+
+✏️ Corto Plazo:
+├─ Autenticación de usuarios
+├─ Historial de cambios
+├─ Notificaciones de bajo stock
+└─ Exportar a PDF
+
+📈 Mediano Plazo:
+├─ API REST
+├─ Reportes avanzados
+├─ Integración con facturación
+└─ Dashboard con gráficos
+
+🚀 Largo Plazo:
+├─ Multi-usuario con permisos
+├─ Sincronización en tiempo real
+├─ Aplicación móvil
+└─ Migración a framework (Laravel, Symfony)
+
+================================================================================
+SOPORTE Y RECURSOS
+================================================================================
+
+Documentación:
+├─ README.md (Guía completa)
+├─ QUICKSTART.md (Inicio rápido)
+├─ ARQUITECTURA.md (Explicación MVC)
+└─ Este archivo (Estructura)
+
+Herramientas:
+├─ diagnostico.php (Verificar instalación)
+├─ phpMyAdmin (Gestionar BD)
+└─ VS Code (Editor recomendado)
+
+Comandos Útiles:
+├─ http://localhost/phpmyadmin (Gestión de BD)
+├─ http://localhost/equimac (Acceder al sistema)
+└─ http://localhost/equimac/diagnostico.php (Diagnóstico)
+
+================================================================================
+NOTAS IMPORTANTES
+================================================================================
+
+1. El código es único y no puede cambiar en edición
+2. La contraseña de MySQL en XAMPP es vacía por defecto
+3. Los datos de ejemplo se pueden eliminar sin problemas
+4. Las carpetas tienen index.php para prevenir acceso directo
+5. El charset está configurado a UTF-8 (soporta acentos)
+6. Backup regular de la BD se recomienda
+7. Este archivo diagnostico.php debe eliminarse antes de producción
+
+================================================================================
+Fecha de Creación: 21 de Abril de 2026
+Versión: 1.0
+Autor: Desarrollador Full-Stack (PHP + MySQL + MVC)
+================================================================================

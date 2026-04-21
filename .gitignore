@@ -1,0 +1,44 @@
+# Logs
+*.log
+logs/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# PHP
+*.php~
+
+# Node (si se usa en futuro)
+node_modules/
+package-lock.json
+
+# Bases de datos locales
+*.db
+*.sqlite
+
+# Backups
+*.bak
+*.backup
+*~
+
+# Archivos temporales
+tmp/
+temp/
+cache/
+
+# Credenciales locales
+.env.local
+config.local.php
+
+# Archivos de desarrollo
+debug.log

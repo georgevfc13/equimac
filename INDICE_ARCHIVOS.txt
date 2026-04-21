@@ -1,0 +1,543 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                          📑 ÍNDICE DE ARCHIVOS                                ║
+║                    SISTEMA DE INVENTARIO - EQUIMAC                            ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+📂 UBICACIÓN: C:\xampp\htdocs\equimac\
+═══════════════════════════════════════════════════════════════════════════════
+
+═══════════════════════════════════════════════════════════════════════════════
+🔵 ARCHIVOS PRINCIPALES (Root)
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 index.php
+   └─ Punto de entrada de la aplicación
+   └─ Enrutador que distribuye acciones
+   └─ Maneja errores globales
+   └─ Líneas: 75
+
+📄 database.sql
+   └─ Script SQL para crear base de datos
+   └─ Define tabla 'inventario' completa
+   └─ Crea índices para optimización
+   └─ Incluye 5 productos de ejemplo
+   └─ Líneas: 40
+
+📄 diagnostico.php
+   └─ Verificación del sistema
+   └─ Prueba conexión a BD
+   └─ Muestra información del servidor
+   └─ Acceso: http://localhost/equimac/diagnostico.php
+   └─ Líneas: 200
+
+📄 utils.php
+   └─ Funciones utilitarias compartidas
+   └─ Formateo de moneda y fechas
+   └─ Sanitización de entrada
+   └─ Validaciones
+   └─ Líneas: 80
+
+═══════════════════════════════════════════════════════════════════════════════
+📚 DOCUMENTACIÓN (Root)
+═══════════════════════════════════════════════════════════════════════════════
+
+📖 README.md
+   └─ Guía completa de instalación (LEER PRIMERO)
+   └─ Requisitos, instrucciones paso a paso
+   └─ Explicación MVC, solución de problemas
+   └─ Mejoras futuras, checklist
+   └─ Líneas: 350+
+   └─ PRIORIDAD: ⭐⭐⭐ ALTA
+
+📖 QUICKSTART.md
+   └─ Inicio rápido (5 pasos)
+   └─ Estructura esencial del proyecto
+   └─ URLs principales del sistema
+   └─ Comandos útiles, problemas comunes
+   └─ Líneas: 100+
+   └─ PRIORIDAD: ⭐⭐ MEDIA
+
+📖 ARQUITECTURA.md
+   └─ Explicación detallada de MVC
+   └─ Diagramas de flujo
+   └─ Componentes y responsabilidades
+   └─ Validaciones, seguridad, patrones
+   └─ Líneas: 300+
+   └─ PRIORIDAD: ⭐⭐ MEDIA
+
+📖 ESTRUCTURA_COMPLETA.txt
+   └─ Árbol completo de directorios
+   └─ Descripción detallada de cada archivo
+   └─ Flujo MVC en acción
+   └─ Estadísticas del proyecto
+   └─ Líneas: 400+
+   └─ PRIORIDAD: ⭐⭐ MEDIA
+
+📖 REFERENCIA_RAPIDA.txt
+   └─ Resumen en tablas
+   └─ URLs y rutas principales
+   └─ Operaciones CRUD
+   └─ Credenciales, comandos, tips
+   └─ Líneas: 200+
+   └─ PRIORIDAD: ⭐⭐ MEDIA
+
+📖 VERIFICACION.txt
+   └─ Checklist de verificación completo
+   └─ Tests funcionales
+   └─ Medidas de seguridad
+   └─ Compatibilidad, preguntas frecuentes
+   └─ Líneas: 300+
+   └─ PRIORIDAD: ⭐⭐ MEDIA
+
+📖 RESUMEN_EJECUTIVO.txt
+   └─ Resumen del proyecto para stakeholders
+   └─ Objetivos cumplidos, entregables
+   └─ Stack tecnológico elegido
+   └─ Métricas de calidad
+   └─ Líneas: 250+
+   └─ PRIORIDAD: ⭐⭐⭐ ALTA
+
+📖 INDICE_ARCHIVOS.txt (Este archivo)
+   └─ Índice completo con descripciones
+   └─ Guía de qué leer según necesidad
+   └─ Mapeo de funcionalidades
+
+═══════════════════════════════════════════════════════════════════════════════
+🔐 CONFIGURACIÓN (Root)
+═══════════════════════════════════════════════════════════════════════════════
+
+🔑 .htaccess
+   └─ Configuración de Apache
+   └─ Reescritura de URLs
+   └─ Headers de seguridad
+   └─ Control de caché
+
+🔑 .gitignore
+   └─ Archivos a ignorar en Git
+   └─ Logs, backups, temporales
+   └─ Credenciales locales
+
+═══════════════════════════════════════════════════════════════════════════════
+⚙️ CONFIG (config/)
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 config/database.php
+   └─ Configuración de conexión a BD
+   └─ Patrón Singleton para instancia única
+   └─ Credenciales (HOST, USER, PASSWORD, DB)
+   └─ Función helper getDB()
+   └─ Líneas: 80
+   └─ IMPORTANTE: Cambiar en producción
+
+📄 config/index.php
+   └─ Protección contra acceso directo
+   └─ HTTP 403 Forbidden
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 MODELS (models/)
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 models/Inventario.php
+   └─ Modelo para acceso a datos
+   └─ Métodos CRUD:
+      ├─ crear($datos)           → INSERT
+      ├─ obtenerTodos($filtro)   → SELECT *
+      ├─ obtenerPorId($id)       → SELECT WHERE
+      ├─ actualizar($id, $datos) → UPDATE
+      ├─ eliminar($id)           → DELETE
+   └─ Métodos auxiliares:
+      ├─ obtenerCategorias()     → SELECT DISTINCT
+      ├─ obtenerEstadisticas()   → Aggregates
+      └─ codigoExiste()          → Validación
+   └─ Características:
+      ├─ Prepared statements (seguridad)
+      ├─ Type binding
+      ├─ Error handling
+   └─ Líneas: 200+
+
+📄 models/index.php
+   └─ Protección contra acceso directo
+   └─ HTTP 403 Forbidden
+
+═══════════════════════════════════════════════════════════════════════════════
+🎮 CONTROLLERS (controllers/)
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 controllers/InventarioController.php
+   └─ Controlador principal
+   └─ Métodos de acción:
+      ├─ listar()              → GET productos
+      ├─ formulario()          → GET formulario
+      ├─ guardar()             → POST crear/editar
+      ├─ eliminar()            → GET eliminar
+   └─ Métodos internos:
+      ├─ validar()             → Validación
+      ├─ renderizar()          → Renderizar vista
+   └─ Responsabilidades:
+      ├─ Procesar entrada
+      ├─ Validar datos
+      ├─ Llamar modelo
+      ├─ Preparar vista
+   └─ Líneas: 180+
+
+📄 controllers/index.php
+   └─ Protección contra acceso directo
+   └─ HTTP 403 Forbidden
+
+═══════════════════════════════════════════════════════════════════════════════
+🎨 VIEWS (views/)
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 views/layout.php
+   └─ HTML base de la aplicación
+   └─ Estructura común:
+      ├─ Navbar con logo
+      ├─ Sistema de alertas
+      ├─ Contenedor principal
+      ├─ Footer
+   └─ Incluye CSS y JavaScript
+   └─ Líneas: 50
+
+📄 views/lista.php
+   └─ Vista de listado de productos
+   └─ Componentes:
+      ├─ Encabezado
+      ├─ Tarjetas estadísticas
+      ├─ Buscador con filtro
+      ├─ Tabla de productos
+      ├─ Botones de acción
+   └─ Líneas: 120+
+
+📄 views/formulario.php
+   └─ Vista de formulario crear/editar
+   └─ Campos:
+      ├─ Código (readonly en edición)
+      ├─ Nombre, descripción
+      ├─ Cantidad, precio
+      ├─ Categoría, estado
+   └─ Validación JavaScript
+   └─ Líneas: 150+
+
+📄 views/index.php
+   └─ Protección contra acceso directo
+   └─ HTTP 403 Forbidden
+
+═══════════════════════════════════════════════════════════════════════════════
+💄 ASSETS (public/)
+═══════════════════════════════════════════════════════════════════════════════
+
+📄 public/css/style.css
+   └─ Estilos completos del sistema
+   └─ Secciones:
+      ├─ Variables CSS personalizadas
+      ├─ Estilos globales
+      ├─ Navbar responsive
+      ├─ Alertas y mensajes
+      ├─ Botones (todos los tipos)
+      ├─ Tarjetas y estadísticas
+      ├─ Buscador y tabla
+      ├─ Badges (estados)
+      ├─ Formularios
+      ├─ Footer
+      ├─ Media queries (responsive)
+   └─ Características:
+      ├─ 1000+ líneas
+      ├─ Responsive design
+      ├─ Animaciones suaves
+      ├─ Variables reutilizables
+      ├─ Sombras y gradientes
+
+📄 public/js/script.js
+   └─ JavaScript interactivo
+   └─ Funciones:
+      ├─ confirmarEliminar()    → Modal confirmación
+      ├─ buscarEnTabla()        → Búsqueda tiempo real
+      ├─ formatearMoneda()      → Formato $
+      ├─ mostrarNotificacion()  → Alertas temporales
+      ├─ exportarTablaCSV()     → Descargar datos
+      ├─ imprimirTabla()        → Print friendly
+      ├─ validarCantidad()      → Solo números
+      ├─ validarPrecio()        → Números + decimales
+   └─ Características:
+      ├─ 400+ líneas
+      ├─ Sin jQuery
+      ├─ Validaciones
+      ├─ UX mejorada
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 LOGS (logs/)
+═══════════════════════════════════════════════════════════════════════════════
+
+📂 logs/
+   └─ Directorio para archivos de log
+   └─ Se genera automáticamente con Utils::registrarLog()
+   └─ Útil para debugging
+
+📄 logs/index.php
+   └─ Protección contra acceso directo
+   └─ HTTP 403 Forbidden
+
+═══════════════════════════════════════════════════════════════════════════════
+🗂️ ÁRBOL COMPLETO
+═══════════════════════════════════════════════════════════════════════════════
+
+equimac/
+├── index.php                           ← PUNTO DE ENTRADA
+├── diagnostico.php                     ← Verificación
+├── database.sql                        ← BD Script
+├── utils.php                           ← Funciones helper
+│
+├── README.md                           ← ⭐ LEER PRIMERO
+├── QUICKSTART.md
+├── ARQUITECTURA.md
+├── ESTRUCTURA_COMPLETA.txt
+├── REFERENCIA_RAPIDA.txt
+├── VERIFICACION.txt
+├── RESUMEN_EJECUTIVO.txt
+├── INDICE_ARCHIVOS.txt                 ← Este archivo
+│
+├── .htaccess
+├── .gitignore
+│
+├── config/
+│   ├── database.php                    ← 🔑 CONFIGURACIÓN IMPORTANTE
+│   └── index.php
+│
+├── models/
+│   ├── Inventario.php                  ← 📊 ACCESO A DATOS
+│   └── index.php
+│
+├── controllers/
+│   ├── InventarioController.php        ← 🎮 LÓGICA DE NEGOCIO
+│   └── index.php
+│
+├── views/
+│   ├── layout.php                      ← 🎨 HTML BASE
+│   ├── lista.php                       ← 🎨 TABLA PRODUCTOS
+│   ├── formulario.php                  ← 🎨 FORMULARIO CRUD
+│   └── index.php
+│
+├── public/
+│   ├── css/
+│   │   └── style.css                   ← 💄 ESTILOS
+│   │
+│   └── js/
+│       └── script.js                   ← 🔧 JAVASCRIPT
+│
+└── logs/
+    └── index.php
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 GUÍA DE LECTURA (Según tu necesidad)
+═══════════════════════════════════════════════════════════════════════════════
+
+¿NECESITO INSTALAR?
+  1. Lee: README.md
+  2. Sigue: Instrucciones de instalación
+  3. Verifica: diagnostico.php
+
+¿QUIERO ENTENDER MVC?
+  1. Lee: ARQUITECTURA.md
+  2. Referencia: controllers/InventarioController.php
+  3. Mira: models/Inventario.php y views/
+
+¿QUIERO COMENZAR RÁPIDO?
+  1. Lee: QUICKSTART.md
+  2. Ejecuta: 5 pasos
+  3. ¡Usa el sistema!
+
+¿NECESITO REFERENCIA?
+  1. Consulta: REFERENCIA_RAPIDA.txt
+  2. URLs: En tabla de REFERENCIA_RAPIDA.txt
+  3. Comandos: En tabla de REFERENCIA_RAPIDA.txt
+
+¿QUIERO VERIFICAR TODO?
+  1. Ejecuta: diagnostico.php
+  2. Sigue: VERIFICACION.txt checklist
+  3. Prueba: Todos los tests funcionales
+
+¿QUIERO VER ESTADÍSTICAS?
+  1. Lee: RESUMEN_EJECUTIVO.txt
+  2. Ve: Líneas de código, archivos, funcionalidades
+  3. Métricas: Calidad, cobertura, seguridad
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 MAPEO DE FUNCIONALIDADES
+═══════════════════════════════════════════════════════════════════════════════
+
+CREAR PRODUCTO:
+  ├─ Usuario abre: http://localhost/equimac/?accion=formulario
+  ├─ Ve: views/formulario.php
+  ├─ Envía: POST a index.php?accion=guardar
+  ├─ Procesa: InventarioController::guardar()
+  ├─ Valida: validar() en controlador
+  ├─ BD: Inventario::crear() en modelo
+  └─ Muestra: views/lista.php actualizado
+
+LISTAR PRODUCTOS:
+  ├─ Usuario abre: http://localhost/equimac/
+  ├─ Ejecuta: InventarioController::listar()
+  ├─ Obtiene: Inventario::obtenerTodos() del modelo
+  ├─ Muestra: views/lista.php
+  └─ Incluye: Estadísticas, búsqueda, tabla
+
+EDITAR PRODUCTO:
+  ├─ Usuario hace clic: "✎ Editar" en tabla
+  ├─ Va a: http://localhost/equimac/?accion=formulario&id=1
+  ├─ Carga: Inventario::obtenerPorId($id)
+  ├─ Muestra: formulario.php pre-cargado
+  ├─ Envía: POST a index.php?accion=guardar
+  ├─ BD: Inventario::actualizar($id, $datos)
+  └─ Resultado: Lista.php actualizado
+
+ELIMINAR PRODUCTO:
+  ├─ Usuario hace clic: "🗑 Eliminar"
+  ├─ Confirma: JavaScript alert
+  ├─ Va a: http://localhost/equimac/?accion=eliminar&id=1
+  ├─ Procesa: InventarioController::eliminar()
+  ├─ BD: Inventario::eliminar($id)
+  └─ Muestra: lista.php sin el producto
+
+BUSCAR PRODUCTO:
+  ├─ Usuario escribe en buscador
+  ├─ Se ejecuta: JavaScript en tiempo real
+  ├─ Filtra: Tabla localmente
+  ├─ O envía: GET con parámetro ?buscar=término
+  ├─ Procesa: InventarioController::listar()
+  ├─ BD: Inventario::obtenerTodos($filtro)
+  └─ Muestra: Tabla filtrada
+
+═══════════════════════════════════════════════════════════════════════════════
+🔄 FLUJO DE DATOS
+═══════════════════════════════════════════════════════════════════════════════
+
+HTTP REQUEST
+    ↓
+index.php (ENRUTADOR)
+    ↓
+Identifica ?accion= (listar|formulario|guardar|eliminar)
+    ↓
+Instancia InventarioController
+    ↓
+Ejecuta método correspondiente
+    ↓
+Controlador obtiene parámetros (GET/POST)
+    ↓
+Valida entrada (client + server)
+    ↓
+Llama métodos de Inventario (Modelo)
+    ↓
+Modelo ejecuta queries a MySQLi
+    ↓
+Base de datos procesa consulta
+    ↓
+Retorna datos a Modelo
+    ↓
+Modelo retorna a Controlador
+    ↓
+Controlador prepara datos para vista
+    ↓
+Renderiza views/layout.php (HTML base)
+    ↓
+Incluye views/lista.php, formulario.php, etc
+    ↓
+Incluye public/css/style.css (estilos)
+    ↓
+Incluye public/js/script.js (interacción)
+    ↓
+HTTP RESPONSE (HTML completo)
+    ↓
+NAVEGADOR renderiza página
+
+═══════════════════════════════════════════════════════════════════════════════
+✨ ARCHIVOS CLAVES
+═══════════════════════════════════════════════════════════════════════════════
+
+PARA ENTENDER ARQUITECTURA:
+  1. index.php              (enrutador)
+  2. InventarioController.php   (coordinador)
+  3. Inventario.php         (datos)
+  4. lista.php              (presentación)
+
+PARA MODIFICAR FUNCIONALIDAD:
+  1. Inventario.php         (agregar métodos BD)
+  2. InventarioController.php   (agregar lógica)
+  3. views/                 (agregar vistas)
+
+PARA SEGURIDAD:
+  1. config/database.php    (credenciales)
+  2. Inventario.php         (prepared statements)
+  3. InventarioController.php   (validaciones)
+  4. views/                 (escapado HTML)
+
+PARA ESTILO:
+  1. public/css/style.css   (estilos)
+  2. views/layout.php       (estructura HTML)
+
+═══════════════════════════════════════════════════════════════════════════════
+📞 REFERENCIAS CRUZADAS
+═══════════════════════════════════════════════════════════════════════════════
+
+¿DÓNDE ESTÁ...?
+
+Conexión a BD:
+  → config/database.php (Singleton pattern)
+
+Métodos CRUD:
+  → models/Inventario.php (crear, obtener, actualizar, eliminar)
+
+Lógica de negocio:
+  → controllers/InventarioController.php
+
+Estilos visuales:
+  → public/css/style.css (responsive design)
+
+Interactividad:
+  → public/js/script.js (validaciones, confirmaciones)
+
+Tabla de productos:
+  → views/lista.php
+
+Formulario:
+  → views/formulario.php
+
+Layout base:
+  → views/layout.php
+
+Base de datos:
+  → database.sql (script SQL)
+
+Configuración:
+  → config/database.php (credenciales)
+
+Documentación:
+  → README.md (guía principal)
+  → ARQUITECTURA.md (explicación MVC)
+  → QUICKSTART.md (inicio rápido)
+
+═══════════════════════════════════════════════════════════════════════════════
+🎓 NOTAS FINALES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Este sistema está 100% FUNCIONAL y listo para usar
+2. Todos los archivos están documentados internamente
+3. Sigue MVC estrictamente - fácil de mantener
+4. Usa prepared statements - seguro contra inyecciones
+5. Responsive design - funciona en móvil
+6. Toda la documentación está en la carpeta raíz
+
+PARA EMPEZAR:
+  1. Lee: README.md
+  2. Instala: Sigue las instrucciones
+  3. Verifica: Ejecuta diagnostico.php
+  4. Usa: http://localhost/equimac
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Documento: Índice de Archivos
+Versión: 1.0
+Fecha: 21 de Abril de 2026
+Estado: Completo
+
+═══════════════════════════════════════════════════════════════════════════════
