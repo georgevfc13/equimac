@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Inventario - EQUIMAC</title>
-    <link rel="stylesheet" href="/equimac/public/css/style.css">
+    <link rel="stylesheet" href="asset/css/style.css">
 </head>
 <body>
     <!-- Navbar -->
@@ -42,6 +42,6 @@
         <p>&copy; 2026 EQUIMAC - Sistema de Inventario | Desarrollado con PHP + MySQL</p>
     </footer>
 
-    <script src="/equimac/public/js/script.js"></script>
+    <script src="asset/js/script.js"></script>
 </body>
 </html>
