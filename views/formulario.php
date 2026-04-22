@@ -1,21 +1,19 @@
-<!-- Vista: Formulario Crear/Editar Producto -->
-
 <div class="seccion-formulario">
     <!-- Encabezado -->
     <div class="encabezado">
         <h2><?php echo $es_edicion ? 'Editar Producto' : 'Nuevo Producto'; ?></h2>
     </div>
-
+ 
     <!-- Formulario -->
     <form action="index.php?accion=guardar" method="POST" class="formulario-producto" id="formularioProducto">
         
         <?php if ($es_edicion): ?>
             <input type="hidden" name="id" value="<?php echo $producto['id']; ?>">
         <?php endif; ?>
-
+ 
         <div class="seccion-formulario-grupo">
             <h3>📋 Información Básica</h3>
-
+ 
             <!-- Código -->
             <div class="grupo-form">
                 <label for="codigo">Código de Producto <span class="requerido">*</span></label>
@@ -25,7 +23,7 @@
                        placeholder="EQ-001" required>
                 <small class="ayuda">Código único del producto (ej: EQ-001)</small>
             </div>
-
+ 
             <!-- Descripción -->
             <div class="grupo-form">
                 <label for="descripcion">Descripción <span class="requerido">*</span></label>
@@ -34,7 +32,7 @@
                        placeholder="Motor Eléctrico 1HP" required>
                 <small class="ayuda">Descripción clara del producto</small>
             </div>
-
+ 
             <!-- Unidad -->
             <div class="grupo-form">
                 <label for="unidad">Unidad de Medida <span class="requerido">*</span></label>
@@ -48,7 +46,7 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-
+ 
             <!-- Cantidad -->
             <div class="grupo-form">
                 <label for="cantidad">Cantidad <span class="requerido">*</span></label>
@@ -57,10 +55,10 @@
                        min="0" placeholder="0" required>
             </div>
         </div>
-
+ 
         <div class="seccion-formulario-grupo">
             <h3>🏷️ Información Adicional</h3>
-
+ 
             <!-- Marca -->
             <div class="grupo-form">
                 <label for="marca">Marca</label>
@@ -74,7 +72,7 @@
                     <?php endforeach; ?>
                 </datalist>
             </div>
-
+ 
             <!-- Equipo -->
             <div class="grupo-form">
                 <label for="equipo">Equipo</label>
@@ -82,7 +80,7 @@
                        value="<?php echo htmlspecialchars($producto['equipo'] ?? ''); ?>"
                        placeholder="Ej: Compresor, Bomba...">
             </div>
-
+ 
             <!-- Aplicación -->
             <div class="grupo-form">
                 <label for="aplicacion">Aplicación</label>
@@ -90,7 +88,7 @@
                        value="<?php echo htmlspecialchars($producto['aplicacion'] ?? ''); ?>"
                        placeholder="Ej: Aire acondicionado, Refrigeración...">
             </div>
-
+ 
             <!-- Tipo de Maquinaria -->
             <div class="grupo-form">
                 <label for="tipo_maquinaria">Tipo de Maquinaria</label>
@@ -105,46 +103,64 @@
                 </datalist>
             </div>
         </div>
-
+ 
         <div class="seccion-formulario-grupo">
             <h3>📍 Ubicación en Estante <span class="requerido">*</span></h3>
-
+ 
             <!-- Estante -->
             <div class="grupo-form">
                 <label for="estante">Estante <span class="requerido">*</span></label>
-                <select id="estante" name="estante" class="input-form" required onchange="actualizarEntrepaños()">
+                <select id="estante" name="estante" class="input-form" required onchange="actualizarVisualizacionEstante()">
                     <option value="">-- Seleccionar Estante --</option>
                     <?php foreach ($estantes as $est): ?>
                         <option value="<?php echo $est['numero']; ?>" 
                                 data-filas="<?php echo $est['filas']; ?>"
                                 data-columnas="<?php echo $est['columnas']; ?>"
+                                data-descripcion="<?php echo htmlspecialchars($est['descripcion']); ?>"
+                                data-ubicacion="<?php echo htmlspecialchars($est['ubicacion']); ?>"
                                 <?php echo (isset($producto['estante']) && $producto['estante'] == $est['numero']) ? 'selected' : ''; ?>>
-                            Estante <?php echo $est['numero']; ?> (<?php echo $est['descripcion']; ?>)
+                            Estante <?php echo $est['numero']; ?> - <?php echo htmlspecialchars($est['descripcion']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
                 <small class="ayuda">Selecciona el estante donde se guardará el producto</small>
             </div>
-
-            <!-- Entrepaño -->
+ 
+            <!-- Entrepaño (Fila) -->
             <div class="grupo-form">
-                <label for="entrepaño">Entrepaño (Fila) <span class="requerido">*</span></label>
-                <select id="entrepaño" name="entrepaño" class="input-form" required>
+                <label for="entrepaño">Fila <span class="requerido">*</span></label>
+                <select id="entrepaño" name="entrepaño" class="input-form" required onchange="actualizarVisualizacionEstante()">
                     <option value="">-- Selecciona un estante primero --</option>
                 </select>
-                <small class="ayuda">Selecciona la fila/entrepaño del estante</small>
+                <small class="ayuda">Selecciona la fila del estante</small>
             </div>
-
-            <!-- Vista previa del estante -->
-            <div id="preview-estante" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: none;">
-                <p style="margin-top: 0; font-weight: bold; color: #333;">📋 Vista previa de ubicación:</p>
-                <div id="estante-visual"></div>
+ 
+            <!-- Vista previa del estante mejorada -->
+            <div id="preview-estante" class="preview-estante-container" style="display: none; margin-top: 25px;">
+                <div class="preview-info">
+                    <h4 style="margin: 0 0 15px 0; color: #333; font-size: 16px;">
+                        <span style="color: #FF9800;">🗂️</span> Haz clic en una posición para seleccionarla
+                    </h4>
+                </div>
+ 
+                <div class="estante-3d" id="estante-visual">
+                    <!-- Se rellena con JavaScript -->
+                </div>
+ 
+                <!-- Información de selección -->
+                <div id="info-posicion-seleccionada" class="info-posicion-form" style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-left: 4px solid #2196F3; border-radius: 6px; display: none;">
+                    <strong style="color: #1565c0;">✓ Ubicación seleccionada:</strong><br>
+                    <span id="texto-posicion" style="font-size: 15px; color: #6a1b9a; font-weight: bold; margin-top: 5px; display: block;"></span>
+                </div>
             </div>
+ 
+            <!-- Posición (oculto, se maneja con JavaScript) -->
+            <input type="hidden" id="posicion" name="posicion" value="1">
         </div>
-
+ 
         <div class="seccion-formulario-grupo">
             <h3>⚙️ Estado</h3>
-
+ 
             <!-- Estado -->
             <div class="grupo-form">
                 <label for="estado">Estado</label>
@@ -157,7 +173,7 @@
                 </select>
             </div>
         </div>
-
+ 
         <!-- Acciones -->
         <div class="grupo-acciones">
             <button type="submit" class="btn btn-primary btn-grande">
@@ -168,7 +184,7 @@
             </a>
         </div>
     </form>
-
+ 
     <!-- Información Adicional -->
     <div class="info-formulario">
         <h4>💡 Recomendaciones</h4>
@@ -176,17 +192,18 @@
             <li>El código debe ser único para cada producto</li>
             <li>La descripción debe ser clara y concisa</li>
             <li>Los campos marcados con * son obligatorios</li>
-            <li>La ubicación (Estante y Entrepaño) es necesaria para encontrar el producto</li>
+            <li>Selecciona una ubicación específica en el estante haciendo clic en una posición</li>
             <li>Completa los campos adicionales para mejor organización y búsqueda</li>
         </ul>
     </div>
 </div>
-
+ 
 <script>
 // Obtener estantes dinámicamente
 const estantes = <?php echo json_encode($estantes); ?>;
-
-function actualizarEntrepaños() {
+let posicionSeleccionada = null;
+ 
+function actualizarVisualizacionEstante() {
     const estanteSelect = document.getElementById('estante');
     const entrepaño_select = document.getElementById('entrepaño');
     const previestante = document.getElementById('preview-estante');
@@ -204,7 +221,7 @@ function actualizarEntrepaños() {
     if (!estante) return;
     
     // Actualizar opciones de entrepaño
-    let html = '<option value="">-- Seleccionar Entrepaño --</option>';
+    let html = '<option value="">-- Seleccionar Fila --</option>';
     for (let i = 1; i <= estante.filas; i++) {
         html += `<option value="${i}">Fila ${i}</option>`;
     }
@@ -216,56 +233,116 @@ function actualizarEntrepaños() {
     
     if (productoEstante == estante_id && productoEntrepaño) {
         entrepaño_select.value = productoEntrepaño;
+        actualizarVisualizacionEstante();
     }
     
-    // Mostrar previsualización
-    previestante.style.display = 'block';
-    dibujarEstante(estante, entrepaño_select.value);
+    // Si hay fila seleccionada, mostrar previsualización
+    if (entrepaño_select.value) {
+        previestante.style.display = 'block';
+        dibujarEstanteRealista(estante, entrepaño_select.value);
+    }
 }
-
-function dibujarEstante(estante, entrepaño_seleccionado) {
+ 
+function dibujarEstanteRealista(estante, entrepaño_seleccionado) {
     const contenedor = document.getElementById('estante-visual');
-    let html = `<div style="font-size: 12px; margin: 10px 0;">Estante ${estante.numero}: ${estante.filas} filas × ${estante.columnas} columnas</div>`;
-    html += '<div style="display: flex; flex-direction: column; gap: 8px;">';
+    const numPosiciones = 5; // 5 posiciones por fila
     
-    for (let fila = 1; fila <= estante.filas; fila++) {
-        html += '<div style="display: flex; gap: 5px; align-items: center;">';
-        html += `<div style="width: 60px; text-align: right; font-weight: bold; font-size: 13px;">Fila ${fila}</div>`;
+    // Información del estante
+    let html = `<div class="estante-info-header">
+        <span class="estante-num-grande">${estante.numero}</span>
+        <div class="estante-datos">
+            <div><strong>${estante.descripcion}</strong></div>
+            <div style="font-size: 12px; color: #666;">📍 ${estante.ubicacion}</div>
+        </div>
+    </div>`;
+    
+    html += '<div class="estante-compartimientos">';
+    
+    // Mostrar solo la fila seleccionada
+    const filaNum = parseInt(entrepaño_seleccionado);
+    
+    html += `<div class="fila-estante-grande" data-fila="${filaNum}">
+        <div class="etiqueta-fila-grande">Fila ${filaNum}</div>
+        <div class="posiciones-grid">`;
+    
+    for (let pos = 1; pos <= numPosiciones; pos++) {
+        const esSeleccionado = posicionSeleccionada === pos;
+        const claseSeleccion = esSeleccionado ? 'posicion-seleccionada' : '';
         
-        for (let col = 1; col <= estante.columnas; col++) {
-            const esSeleccionado = fila == entrepaño_seleccionado;
-            const bgcolor = esSeleccionado ? '#4CAF50' : '#e0e0e0';
-            const color = esSeleccionado ? 'white' : '#666';
-            
-            html += `<div style="width: 40px; height: 40px; background: ${bgcolor}; border: 2px solid #999; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: ${color}; font-weight: bold; font-size: 11px;">${col}</div>`;
-        }
-        html += '</div>';
+        html += `<div class="compartimiento-estante ${claseSeleccion}" 
+                      data-posicion="${pos}" 
+                      onclick="seleccionarPosicion(${filaNum}, ${pos})">
+            <div class="numero-posicion">${pos}</div>
+            <div class="icono-posicion">📦</div>
+        </div>`;
     }
     
-    html += '</div>';
+    html += '</div></div></div>';
+    
     contenedor.innerHTML = html;
 }
-
+ 
+function seleccionarPosicion(fila, posicion) {
+    // Actualizar posición seleccionada
+    posicionSeleccionada = posicion;
+    
+    // Actualizar campo oculto
+    document.getElementById('posicion').value = posicion;
+    
+    // Actualizar visualización
+    const compartimientos = document.querySelectorAll('.compartimiento-estante');
+    compartimientos.forEach(comp => {
+        comp.classList.remove('posicion-seleccionada');
+    });
+    event.target.closest('.compartimiento-estante').classList.add('posicion-seleccionada');
+    
+    // Mostrar información de selección
+    const infoDiv = document.getElementById('info-posicion-seleccionada');
+    const textoPos = document.getElementById('texto-posicion');
+    const estanteNum = document.getElementById('estante').value;
+    
+    textoPos.textContent = `Estante ${estanteNum} • Fila ${fila} • Posición ${posicion}`;
+    infoDiv.style.display = 'block';
+    
+    // Scroll para mostrar la información
+    setTimeout(() => {
+        infoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+}
+ 
 // Event listeners
-document.getElementById('estante').addEventListener('change', actualizarEntrepaños);
+document.getElementById('estante').addEventListener('change', function() {
+    posicionSeleccionada = null;
+    actualizarVisualizacionEstante();
+});
+ 
 document.getElementById('entrepaño').addEventListener('change', function() {
+    posicionSeleccionada = null;
     const estanteSelect = document.getElementById('estante');
     const estante_id = estanteSelect.value;
-    if (estante_id) {
+    if (estante_id && this.value) {
         const estante = estantes.find(e => e.numero == estante_id);
-        dibujarEstante(estante, this.value);
+        if (estante) {
+            document.getElementById('preview-estante').style.display = 'block';
+            dibujarEstanteRealista(estante, this.value);
+        }
     }
 });
-
+ 
 // Inicializar al cargar
 document.addEventListener('DOMContentLoaded', function() {
-    // Si estamos editando, cargar los entrepaños
     const estante_id = document.getElementById('estante').value;
-    if (estante_id) {
-        actualizarEntrepaños();
+    const entrepaño_val = document.getElementById('entrepaño').value;
+    
+    if (estante_id && entrepaño_val) {
+        const estante = estantes.find(e => e.numero == estante_id);
+        if (estante) {
+            document.getElementById('preview-estante').style.display = 'block';
+            dibujarEstanteRealista(estante, entrepaño_val);
+        }
     }
 });
-
+ 
 // Validación antes de enviar
 document.getElementById('formularioProducto').addEventListener('submit', function(e) {
     const codigo = document.getElementById('codigo').value.trim();
@@ -274,13 +351,20 @@ document.getElementById('formularioProducto').addEventListener('submit', functio
     const cantidad = parseInt(document.getElementById('cantidad').value);
     const estante = document.getElementById('estante').value;
     const entrepaño = document.getElementById('entrepaño').value;
-
+    const posicion = document.getElementById('posicion').value;
+ 
     if (!codigo || !descripcion || !unidad || !estante || !entrepaño) {
         e.preventDefault();
         alert('Por favor completa todos los campos requeridos');
         return false;
     }
-
+ 
+    if (!posicion) {
+        e.preventDefault();
+        alert('Por favor selecciona una posición en el estante');
+        return false;
+    }
+ 
     if (cantidad < 0) {
         e.preventDefault();
         alert('La cantidad no puede ser negativa');
