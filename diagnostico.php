@@ -109,8 +109,8 @@ function item($nombre, $valor, $ok = true) {
         'views/layout.php',
         'views/lista.php',
         'views/formulario.php',
-        'public/css/style.css',
-        'public/js/script.js',
+        'asset/css/style.css',
+        'asset/js/script.js',
         'database.sql'
     ];
 

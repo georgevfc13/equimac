@@ -64,12 +64,12 @@ class Database {
     /**
      * Prevenir clonación
      */
-    private function __clone() {}
+    public function __clone() {}
 
     /**
      * Prevenir unserialization
      */
-    private function __wakeup() {}
+    public function __wakeup() {}
 }
 
 /**

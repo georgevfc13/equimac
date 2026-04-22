@@ -1,3 +1,5 @@
+<!-- Vista: Detalles Completos del Producto -->
+
 <div class="seccion-detalles">
     <!-- Encabezado -->
     <div class="encabezado-detalles">
@@ -7,7 +9,7 @@
             <a href="index.php?accion=listar" class="btn btn-secundario">← Volver</a>
         </div>
     </div>
- 
+
     <div class="contenido-detalles">
         <!-- Columna Izquierda: Información del Producto -->
         <div class="columna-info">
@@ -33,7 +35,7 @@
                     </div>
                 </div>
             </div>
- 
+
             <!-- Información Adicional -->
             <div class="tarjeta-seccion">
                 <h3 class="titulo-seccion">🏷️ Información Adicional</h3>
@@ -67,7 +69,7 @@
                     <?php endif; ?>
                 </div>
             </div>
- 
+
             <!-- Estado -->
             <div class="tarjeta-seccion">
                 <h3 class="titulo-seccion">⚙️ Estado</h3>
@@ -86,7 +88,7 @@
                     </div>
                 </div>
             </div>
- 
+
             <!-- Información de Fechas -->
             <div class="tarjeta-seccion">
                 <h3 class="titulo-seccion">📅 Información de Sistema</h3>
@@ -106,7 +108,7 @@
                 </div>
             </div>
         </div>
- 
+
         <!-- Columna Derecha: Ubicación en Estante -->
         <div class="columna-estante">
             <!-- Ubicación -->
@@ -136,7 +138,7 @@
                     <p>No hay información de estante disponible</p>
                 <?php endif; ?>
             </div>
- 
+
             <!-- Esquema Visual del Estante - MEJORADO -->
             <div class="tarjeta-seccion seccion-detalles-estante">
                 <h3 class="titulo-seccion">🗂️ Esquema del Estante <?php echo $estante['numero']; ?></h3>
@@ -156,7 +158,7 @@
                         <span>Espacio vacío</span>
                     </div>
                 </div>
- 
+
                 <!-- Contenedor de esquema -->
                 <div class="estante-esquema-container">
                     <?php if ($estante): ?>
@@ -167,33 +169,27 @@
                                     <div class="etiqueta-fila-esquema">Fila <?php echo $fila; ?></div>
                                     <div class="posiciones-esquema">
                                         <?php 
-                                            // Obtener productos en esta fila
-                                            $productosEnFila = [];
-                                            foreach ($productosEnUbicacion as $prod) {
-                                                if ($prod['entrepaño'] == $fila) {
-                                                    $productosEnFila[] = $prod;
-                                                }
-                                            }
-                                            
                                             // Crear 5 posiciones
                                             for ($pos = 1; $pos <= 5; $pos++) {
                                                 $tieneProducto = false;
                                                 $productoEnPosicion = null;
                                                 
-                                                // Verificar si hay un producto en esta posición
-                                                foreach ($productosEnFila as $prod) {
-                                                    if (intval($prod['id']) === intval($producto['id'])) {
-                                                        $tieneProducto = true;
-                                                        $productoEnPosicion = $prod;
-                                                        break;
-                                                    }
+                                                // Verificar si es la posición actual del producto
+                                                if (intval($producto['entrepaño']) === $fila) {
+                                                    $tieneProducto = true;
                                                 }
                                                 
                                                 $claseEstado = '';
                                                 if ($tieneProducto) {
                                                     $claseEstado = 'seleccionado';
-                                                } elseif (count($productosEnFila) > 0) {
-                                                    $claseEstado = 'ocupado';
+                                                } elseif (count($productosEnUbicacion) > 1) {
+                                                    // Si hay otros productos en esta fila
+                                                    foreach ($productosEnUbicacion as $prod) {
+                                                        if ($prod['entrepaño'] == $fila && $prod['id'] != $producto['id']) {
+                                                            $claseEstado = 'ocupado';
+                                                            break;
+                                                        }
+                                                    }
                                                 } else {
                                                     $claseEstado = 'vacio';
                                                 }
@@ -201,8 +197,8 @@
                                             <div class="posicion-esquema <?php echo $claseEstado; ?>">
                                                 <div class="numero-posicion-esquema"><?php echo $pos; ?></div>
                                                 <?php if ($tieneProducto): ?>
-                                                    <div class="codigo-posicion">✓</div>
-                                                <?php elseif (count($productosEnFila) > 0): ?>
+                                                    <div style="font-size: 16px;">✓</div>
+                                                <?php elseif ($claseEstado === 'ocupado'): ?>
                                                     <div style="font-size: 16px; opacity: 0.6;">•</div>
                                                 <?php endif; ?>
                                             </div>
@@ -211,7 +207,7 @@
                                 </div>
                             <?php endfor; ?>
                         </div>
- 
+
                         <!-- Información de productos en la misma fila -->
                         <?php if (count($productosEnUbicacion) > 1): ?>
                             <div class="productos-fila-detalles" style="margin-top: 25px; padding: 20px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #FF9800;">
@@ -237,12 +233,12 @@
                                 </div>
                             </div>
                         <?php endif; ?>
- 
+
                     <?php else: ?>
                         <p>No hay información de estante disponible</p>
                     <?php endif; ?>
                 </div>
- 
+
                 <!-- Botón para imprimir -->
                 <div style="margin-top: 20px; text-align: center; padding-top: 20px; border-top: 1px solid #ddd;">
                     <button type="button" class="btn btn-secondary" onclick="window.print();" style="display: inline-flex; align-items: center; gap: 8px;">
@@ -253,7 +249,7 @@
         </div>
     </div>
 </div>
- 
+
 <style>
     .seccion-detalles {
         background: white;
@@ -261,7 +257,7 @@
         padding: 20px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
- 
+
     .encabezado-detalles {
         display: flex;
         justify-content: space-between;
@@ -270,29 +266,29 @@
         padding-bottom: 20px;
         border-bottom: 2px solid #f0f0f0;
     }
- 
+
     .encabezado-detalles h2 {
         margin: 0;
         color: #333;
     }
- 
+
     .botones-encabezado {
         display: flex;
         gap: 10px;
     }
- 
+
     .contenido-detalles {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 30px;
     }
- 
+
     @media (max-width: 1200px) {
         .contenido-detalles {
             grid-template-columns: 1fr;
         }
     }
- 
+
     .tarjeta-seccion {
         background: #f9f9f9;
         border: 1px solid #e0e0e0;
@@ -300,12 +296,12 @@
         padding: 15px;
         margin-bottom: 20px;
     }
- 
+
     .tarjeta-ubicacion {
         background: #f0f8ff;
         border-color: #b3d9ff;
     }
- 
+
     .titulo-seccion {
         margin: 0 0 15px 0;
         color: #333;
@@ -313,17 +309,17 @@
         border-bottom: 2px solid #ddd;
         padding-bottom: 8px;
     }
- 
+
     .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 15px;
     }
- 
+
     .info-item {
         margin-bottom: 10px;
     }
- 
+
     .info-item label {
         display: block;
         font-weight: bold;
@@ -332,14 +328,14 @@
         text-transform: uppercase;
         margin-bottom: 5px;
     }
- 
+
     .info-item .valor {
         margin: 0;
         color: #333;
         font-size: 14px;
         word-break: break-word;
     }
- 
+
     .codigo-destacado {
         font-size: 18px !important;
         font-weight: bold;
@@ -349,13 +345,13 @@
         border-radius: 4px;
         display: inline-block;
     }
- 
+
     .cantidad-grande {
         font-size: 20px !important;
         font-weight: bold;
         color: #4CAF50;
     }
- 
+
     .estante-numero {
         font-size: 24px !important;
         font-weight: bold;
@@ -367,7 +363,7 @@
         text-align: center;
         width: 100%;
     }
- 
+
     .fila-entrepaño {
         font-size: 16px !important;
         color: #E91E63;
@@ -376,17 +372,17 @@
         border-radius: 4px;
         font-weight: bold;
     }
- 
+
     .productos-fila-detalles h4 {
         margin: 0 0 15px 0;
     }
- 
+
     .lista-productos-fila-detalles {
         display: flex;
         flex-direction: column;
         gap: 10px;
     }
- 
+
     .item-producto-fila-detalles {
         display: flex;
         align-items: center;
@@ -397,23 +393,23 @@
         border: 1px solid #e0e0e0;
         font-size: 13px;
     }
- 
+
     .codigo-fila-detalles {
         color: #2196F3;
         font-weight: bold;
         min-width: 80px;
     }
- 
+
     .descripcion-fila-detalles {
         flex: 1;
         color: #666;
     }
- 
+
     .cantidad-fila-detalles {
         color: #999;
         font-size: 12px;
     }
- 
+
     @media print {
         .botones-encabezado, button {
             display: none;

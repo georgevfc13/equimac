@@ -402,3 +402,106 @@ function actualizarColorPosicion(posicion, estado) {
         }
     }
 }
+
+/**
+ * Actualizar visualización de estante en formulario
+ */
+function actualizarVisualizacionEstante() {
+    const estanteSelect = document.getElementById('estante');
+    const entrepaño = document.getElementById('entrepaño');
+    const previewContainer = document.getElementById('preview-estante');
+    const estanteVisual = document.getElementById('estante-visual');
+    const infoSeleccion = document.getElementById('info-posicion-seleccionada');
+    
+    if (!estanteSelect || !estanteSelect.value) {
+        if (previewContainer) previewContainer.style.display = 'none';
+        return;
+    }
+    
+    const selectedOption = estanteSelect.options[estanteSelect.selectedIndex];
+    const filas = parseInt(selectedOption.getAttribute('data-filas')) || 5;
+    const columnas = parseInt(selectedOption.getAttribute('data-columnas')) || 4;
+    const estanteNum = estanteSelect.value;
+    
+    // Actualizar selector de filas (entrepaño)
+    entrepaño.innerHTML = '<option value="">-- Seleccionar Fila --</option>';
+    for (let i = 1; i <= filas; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Fila ${i}`;
+        entrepaño.appendChild(option);
+    }
+    
+    // Generar visualización del estante
+    if (estanteVisual) {
+        estanteVisual.innerHTML = '';
+        
+        for (let fila = filas; fila >= 1; fila--) {
+            const filaDiv = document.createElement('div');
+            filaDiv.className = 'fila-estante-form';
+            filaDiv.style.display = 'flex';
+            filaDiv.style.gap = '10px';
+            filaDiv.style.marginBottom = '15px';
+            filaDiv.style.alignItems = 'center';
+            
+            // Etiqueta de fila
+            const etiquetaFila = document.createElement('span');
+            etiquetaFila.style.fontWeight = 'bold';
+            etiquetaFila.style.minWidth = '60px';
+            etiquetaFila.textContent = `Fila ${fila}:`;
+            filaDiv.appendChild(etiquetaFila);
+            
+            // Posiciones
+            const posicionesDiv = document.createElement('div');
+            posicionesDiv.style.display = 'flex';
+            posicionesDiv.style.gap = '8px';
+            
+            for (let pos = 1; pos <= columnas; pos++) {
+                const posBtn = document.createElement('button');
+                posBtn.type = 'button';
+                posBtn.style.width = '40px';
+                posBtn.style.height = '40px';
+                posBtn.style.padding = '0';
+                posBtn.style.border = '2px solid #ddd';
+                posBtn.style.borderRadius = '6px';
+                posBtn.style.cursor = 'pointer';
+                posBtn.style.fontSize = '12px';
+                posBtn.style.fontWeight = 'bold';
+                posBtn.style.backgroundColor = '#f5f5f5';
+                posBtn.textContent = pos;
+                
+                posBtn.onclick = function(e) {
+                    e.preventDefault();
+                    // Remover selección anterior
+                    document.querySelectorAll('.fila-estante-form button').forEach(btn => {
+                        btn.style.backgroundColor = '#f5f5f5';
+                        btn.style.borderColor = '#ddd';
+                    });
+                    
+                    // Marcar como seleccionada
+                    this.style.backgroundColor = '#4CAF50';
+                    this.style.borderColor = '#45a049';
+                    this.style.color = 'white';
+                    
+                    // Guardar selección
+                    document.getElementById('entrepaño').value = fila;
+                    document.getElementById('posicion').value = pos;
+                    
+                    // Mostrar información
+                    if (infoSeleccion) {
+                        infoSeleccion.style.display = 'block';
+                        document.getElementById('texto-posicion').textContent = 
+                            `Estante ${estanteNum} - Fila ${fila} - Posición ${pos}`;
+                    }
+                };
+                
+                posicionesDiv.appendChild(posBtn);
+            }
+            
+            filaDiv.appendChild(posicionesDiv);
+            estanteVisual.appendChild(filaDiv);
+        }
+    }
+    
+    if (previewContainer) previewContainer.style.display = 'block';
+}
