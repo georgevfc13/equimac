@@ -118,8 +118,12 @@ class InventarioController {
         $aplicacion = trim($_POST['aplicacion'] ?? '') ?: null;
         $estante = intval($_POST['estante'] ?? 0);
         $entrepaño = intval($_POST['entrepaño'] ?? 0);
+        $posicion = intval($_POST['posicion'] ?? 1);
         $estado = trim($_POST['estado'] ?? '') ?: null;
         $tipo_maquinaria = trim($_POST['tipo_maquinaria'] ?? '') ?: null;
+        $de_quien_llego = trim($_POST['de_quien_llego'] ?? '') ?: null;
+        $precio_pagado = floatval($_POST['precio_pagado'] ?? 0) ?: null;
+        $quien_recibio = trim($_POST['quien_recibio'] ?? '') ?: null;
 
         // Validaciones
         $errores = $this->validar($codigo, $descripcion, $unidad, $cantidad, $estante, $entrepaño, $id);
@@ -147,8 +151,12 @@ class InventarioController {
             'aplicacion' => $aplicacion,
             'estante' => $estante,
             'entrepaño' => $entrepaño,
+            'posicion' => $posicion,
             'estado' => $estado,
-            'tipo_maquinaria' => $tipo_maquinaria
+            'tipo_maquinaria' => $tipo_maquinaria,
+            'de_quien_llego' => $de_quien_llego,
+            'precio_pagado' => $precio_pagado,
+            'quien_recibio' => $quien_recibio
         ];
 
         if ($id) {

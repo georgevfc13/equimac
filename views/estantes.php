@@ -53,7 +53,10 @@
                                         
                                         <?php if ($estaOcupada): ?>
                                             <!-- Posición Ocupada -->
-                                            <div class="posicion-contenido ocupada">
+                                            <div class="posicion-contenido ocupada" 
+                                                 style="cursor: pointer;" 
+                                                 onclick="abrirDetalleProducto(<?php echo $producto['id']; ?>)"
+                                                 title="Clic para ver detalles">
                                                 <div class="estado-color ocupado"></div>
                                                 <div class="posicion-info">
                                                     <strong class="codigo-mini"><?php echo htmlspecialchars($producto['codigo']); ?></strong>
@@ -134,12 +137,10 @@ function filtrarEstantePorNumero(numeroEstante) {
     }
 }
 
-function abrirDetalleProducto(elemento) {
-    const posicion = elemento.querySelector('.posicion-contenido.ocupada');
-    if (posicion) {
-        const codigo = elemento.querySelector('.codigo-mini').textContent;
-        // Aquí puedes agregar lógica para abrir un modal o redirigir
-        console.log('Producto:', codigo);
-    }
+/**
+ * Abre la página de detalles del producto en una nueva pestaña
+ */
+function abrirDetalleProducto(productoId) {
+    window.open(`index.php?accion=detalles&id=${productoId}`, '_blank');
 }
 </script>

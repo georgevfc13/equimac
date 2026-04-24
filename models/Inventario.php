@@ -21,8 +21,8 @@ class Inventario {
      */
     public function crear($datos) {
         $sql = "INSERT INTO {$this->table} 
-                (codigo, descripcion, unidad, cantidad, marca, equipo, aplicacion, estante, entrepaño, estado, tipo_maquinaria) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (codigo, descripcion, unidad, cantidad, marca, equipo, aplicacion, estante, entrepaño, posicion, estado, tipo_maquinaria, de_quien_llego, precio_pagado, quien_recibio) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
         if (!$stmt) {
@@ -30,7 +30,7 @@ class Inventario {
         }
 
         $resultado = $stmt->bind_param(
-            'sssisssiiis',
+            'sssisssiiiissdds',
             $datos['codigo'],
             $datos['descripcion'],
             $datos['unidad'],
@@ -40,8 +40,12 @@ class Inventario {
             $datos['aplicacion'],
             $datos['estante'],
             $datos['entrepaño'],
+            $datos['posicion'],
             $datos['estado'],
-            $datos['tipo_maquinaria']
+            $datos['tipo_maquinaria'],
+            $datos['de_quien_llego'],
+            $datos['precio_pagado'],
+            $datos['quien_recibio']
         );
 
         if (!$resultado || !$stmt->execute()) {
@@ -112,8 +116,8 @@ class Inventario {
     public function actualizar($id, $datos) {
         $sql = "UPDATE {$this->table} 
                 SET descripcion = ?, unidad = ?, cantidad = ?, marca = ?, 
-                    equipo = ?, aplicacion = ?, estante = ?, entrepaño = ?, 
-                    estado = ?, tipo_maquinaria = ?
+                    equipo = ?, aplicacion = ?, estante = ?, entrepaño = ?, posicion = ?,
+                    estado = ?, tipo_maquinaria = ?, de_quien_llego = ?, precio_pagado = ?, quien_recibio = ?
                 WHERE id = ?";
 
         $stmt = $this->db->prepare($sql);
@@ -122,7 +126,7 @@ class Inventario {
         }
 
         $resultado = $stmt->bind_param(
-            'sssisssiiis',
+            'sssissiiissddsdi',
             $datos['descripcion'],
             $datos['unidad'],
             $datos['cantidad'],
@@ -131,8 +135,12 @@ class Inventario {
             $datos['aplicacion'],
             $datos['estante'],
             $datos['entrepaño'],
+            $datos['posicion'],
             $datos['estado'],
             $datos['tipo_maquinaria'],
+            $datos['de_quien_llego'],
+            $datos['precio_pagado'],
+            $datos['quien_recibio'],
             $id
         );
 
@@ -240,6 +248,32 @@ class Inventario {
         $stmt->close();
 
         return $estante;
+    }
+
+    /**
+     * Obtener posiciones ocupadas en una fila del estante
+     */
+    public function obtenerPosicionesOcupadas($estante, $entrepaño) {
+        $sql = "SELECT posicion, codigo, descripcion FROM {$this->table} 
+                WHERE estante = ? AND entrepaño = ? AND posicion IS NOT NULL
+                ORDER BY posicion ASC";
+        
+        $stmt = $this->db->prepare($sql);
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('ii', $estante, $entrepaño);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $posiciones = [];
+
+        while ($fila = $resultado->fetch_assoc()) {
+            $posiciones[] = $fila;
+        }
+
+        $stmt->close();
+        return $posiciones;
     }
 
     /**

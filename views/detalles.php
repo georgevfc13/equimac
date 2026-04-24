@@ -89,6 +89,35 @@
                 </div>
             </div>
 
+            <!-- Información de Recepción -->
+            <div class="tarjeta-seccion">
+                <h3 class="titulo-seccion">📦 Información de Recepción</h3>
+                <div class="info-grid">
+                    <?php if ($producto['de_quien_llego']): ?>
+                    <div class="info-item">
+                        <label>De parte de quién llegó:</label>
+                        <p class="valor"><?php echo htmlspecialchars($producto['de_quien_llego']); ?></p>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($producto['precio_pagado']): ?>
+                    <div class="info-item">
+                        <label>Precio Pagado:</label>
+                        <p class="valor" style="font-weight: bold; color: #2e7d32;">
+                            $<?php echo number_format($producto['precio_pagado'], 2, ',', '.'); ?>
+                        </p>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($producto['quien_recibio']): ?>
+                    <div class="info-item">
+                        <label>Quién lo recibió:</label>
+                        <p class="valor"><?php echo htmlspecialchars($producto['quien_recibio']); ?></p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <!-- Información de Fechas -->
             <div class="tarjeta-seccion">
                 <h3 class="titulo-seccion">📅 Información de Sistema</h3>

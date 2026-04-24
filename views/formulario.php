@@ -149,6 +149,25 @@
                     <!-- Se rellena con JavaScript -->
                 </div>
 
+                <!-- Leyenda de colores -->
+                <div class="leyenda-formulario" style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 6px; border: 1px solid #ddd;">
+                    <strong style="display: block; margin-bottom: 10px; color: #333;">📋 Leyenda:</strong>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%); border: 2px solid #ccc; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #666;">📦</div>
+                            <span style="font-size: 12px;">Posición Libre</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #ef5350 0%, #e53935 100%); border: 2px solid #c62828; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold;">❌</div>
+                            <span style="font-size: 12px;">Posición Ocupada</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); border: 2px solid #2e7d32; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold;">✓</div>
+                            <span style="font-size: 12px;">Seleccionada</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Información de selección -->
                 <div id="info-posicion-seleccionada" class="info-posicion-form" style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-left: 4px solid #2196F3; border-radius: 6px; display: none;">
                     <strong style="color: #1565c0;">✓ Ubicación seleccionada:</strong><br>
@@ -158,6 +177,38 @@
 
             <!-- Posición (oculto, se maneja con JavaScript) -->
             <input type="hidden" id="posicion" name="posicion" value="1">
+        </div>
+
+        <div class="seccion-formulario-grupo">
+            <h3>📦 Información de Recepción</h3>
+
+            <!-- De quién llegó -->
+            <div class="grupo-form">
+                <label for="de_quien_llego">De parte de quién llegó</label>
+                <input type="text" id="de_quien_llego" name="de_quien_llego" class="input-form" 
+                       value="<?php echo htmlspecialchars($producto['de_quien_llego'] ?? ''); ?>"
+                       placeholder="Ej: Juan García, Proveedor ABC...">
+                <small class="ayuda">Nombre del remitente o proveedor</small>
+            </div>
+
+            <!-- Precio pagado -->
+            <div class="grupo-form">
+                <label for="precio_pagado">Precio Pagado</label>
+                <input type="number" id="precio_pagado" name="precio_pagado" class="input-form" 
+                       value="<?php echo isset($producto['precio_pagado']) && $producto['precio_pagado'] ? number_format($producto['precio_pagado'], 2, '.', '') : ''; ?>"
+                       min="0" step="0.01" placeholder="0.00"
+                       onchange="formatearMoneda(this)">
+                <small class="ayuda">Costo unitario del producto</small>
+            </div>
+
+            <!-- Quién lo recibió -->
+            <div class="grupo-form">
+                <label for="quien_recibio">Quién lo recibió</label>
+                <input type="text" id="quien_recibio" name="quien_recibio" class="input-form" 
+                       value="<?php echo htmlspecialchars($producto['quien_recibio'] ?? ''); ?>"
+                       placeholder="Ej: Carlos Rodríguez, Almacenero...">
+                <small class="ayuda">Nombre de la persona que recibió el producto</small>
+            </div>
         </div>
 
         <div class="seccion-formulario-grupo">
@@ -241,7 +292,10 @@ function actualizarVisualizacionEstante() {
     if (entrepaño_select.value) {
         previestante.style.display = 'block';
         posicionSeleccionada = null;
-        dibujarEstanteRealista(estante, parseInt(entrepaño_select.value));
+        const estante = estantes.find(e => parseInt(e.numero) === parseInt(estante_id));
+        if (estante) {
+            dibujarEstanteRealista(estante, parseInt(entrepaño_select.value));
+        }
     }
 }
 
@@ -251,46 +305,72 @@ function dibujarEstanteRealista(estante, entrepaño_seleccionado) {
     
     if (!contenedor) return;
     
-    // Información del estante
-    let html = `<div class="estante-info-header">
-        <span class="estante-num-grande">${estante.numero}</span>
-        <div class="estante-datos">
-            <div><strong>${estante.descripcion || 'Estante'}</strong></div>
-            <div style="font-size: 12px; color: #666;">📍 ${estante.ubicacion || 'Zona'}</div>
-        </div>
-    </div>`;
+    const estanteNum = document.getElementById('estante').value;
     
-    html += '<div class="estante-compartimientos">';
-    
-    const filaNum = parseInt(entrepaño_seleccionado);
-    if (!filaNum || filaNum < 1) {
-        contenedor.innerHTML = '<p>Selecciona una fila válida</p>';
-        return;
-    }
-    
-    html += `<div class="fila-estante-grande" data-fila="${filaNum}">
-        <div class="etiqueta-fila-grande">Fila ${filaNum}</div>
-        <div class="posiciones-grid">`;
-    
-    for (let pos = 1; pos <= numPosiciones; pos++) {
-        const esSeleccionado = posicionSeleccionada === pos;
-        const claseSeleccion = esSeleccionado ? 'posicion-seleccionada' : '';
-        
-        html += `<div class="compartimiento-estante ${claseSeleccion}" 
-                      data-posicion="${pos}" 
-                      onclick="seleccionarPosicion(${filaNum}, ${pos})">
-            <div class="numero-posicion">${pos}</div>
-            <div class="icono-posicion">📦</div>
-        </div>`;
-    }
-    
-    html += '</div></div></div>';
-    
-    contenedor.innerHTML = html;
+    // Cargar posiciones ocupadas vía AJAX
+    fetch(`api/obtener_posiciones.php?estante=${estanteNum}&entrepaño=${entrepaño_seleccionado}`)
+        .then(response => response.json())
+        .then(data => {
+            const posicionesOcupadas = data.posiciones || [];
+            
+            // Información del estante
+            let html = `<div class="estante-info-header">
+                <span class="estante-num-grande">${estante.numero}</span>
+                <div class="estante-datos">
+                    <div><strong>${estante.descripcion || 'Estante'}</strong></div>
+                    <div style="font-size: 12px; color: #666;">📍 ${estante.ubicacion || 'Zona'}</div>
+                </div>
+            </div>`;
+            
+            html += '<div class="estante-compartimientos">';
+            
+            const filaNum = parseInt(entrepaño_seleccionado);
+            if (!filaNum || filaNum < 1) {
+                contenedor.innerHTML = '<p>Selecciona una fila válida</p>';
+                return;
+            }
+            
+            html += `<div class="fila-estante-grande" data-fila="${filaNum}">
+                <div class="etiqueta-fila-grande">Fila ${filaNum}</div>
+                <div class="posiciones-grid">`;
+            
+            for (let pos = 1; pos <= numPosiciones; pos++) {
+                const posicionOcupada = posicionesOcupadas.find(p => parseInt(p.posicion) === pos);
+                const esSeleccionado = posicionSeleccionada === pos;
+                const claseSeleccion = esSeleccionado ? 'posicion-seleccionada' : '';
+                const claseOcupada = posicionOcupada ? 'posicion-ocupada' : '';
+                
+                html += `<div class="compartimiento-estante ${claseSeleccion} ${claseOcupada}" 
+                              data-posicion="${pos}" 
+                              onclick="seleccionarPosicion(${filaNum}, ${pos})"
+                              title="${posicionOcupada ? 'Ocupada: ' + posicionOcupada.codigo : 'Libre'}">
+                    <div class="numero-posicion">${pos}</div>
+                    <div class="icono-posicion">${posicionOcupada ? '❌' : '📦'}</div>
+                    ${posicionOcupada ? `<small style="font-size: 10px; color: #fff; opacity: 0.8;">${posicionOcupada.codigo}</small>` : ''}
+                </div>`;
+            }
+            
+            html += '</div></div></div>';
+            
+            contenedor.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error al cargar posiciones:', error);
+            contenedor.innerHTML = '<p style="color: red;">Error al cargar posiciones ocupadas</p>';
+        });
 }
 
 
 function seleccionarPosicion(fila, posicion) {
+    // Verificar si la posición está ocupada
+    const compartimientosEnFila = document.querySelectorAll(`.compartimiento-estante[data-posicion="${posicion}"]`);
+    if (compartimientosEnFila.length > 0) {
+        if (compartimientosEnFila[0].classList.contains('posicion-ocupada')) {
+            alert('❌ Esta posición ya está ocupada.\n\nSelecciona otra posición libre.');
+            return;
+        }
+    }
+    
     // Actualizar posición seleccionada
     posicionSeleccionada = posicion;
     
@@ -307,7 +387,6 @@ function seleccionarPosicion(fila, posicion) {
     });
     
     // Marcar el compartimiento clickeado
-    const compartimientosEnFila = document.querySelectorAll(`.compartimiento-estante[data-posicion="${posicion}"]`);
     if (compartimientosEnFila.length > 0) {
         compartimientosEnFila[0].classList.add('posicion-seleccionada');
     }

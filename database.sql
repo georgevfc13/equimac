@@ -18,8 +18,12 @@ CREATE TABLE IF NOT EXISTS inventario (
     aplicacion VARCHAR(100),
     estante INT NOT NULL,
     entrepaño INT NOT NULL,
+    posicion INT DEFAULT 1,
     estado VARCHAR(50),
     tipo_maquinaria VARCHAR(100),
+    de_quien_llego VARCHAR(255),
+    precio_pagado DECIMAL(10, 2),
+    quien_recibio VARCHAR(255),
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_codigo (codigo),
@@ -27,6 +31,12 @@ CREATE TABLE IF NOT EXISTS inventario (
     INDEX idx_marca (marca),
     INDEX idx_equipo (equipo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sentencias ALTER para agregar campos si la tabla ya existe
+ALTER TABLE inventario ADD COLUMN IF NOT EXISTS posicion INT DEFAULT 1;
+ALTER TABLE inventario ADD COLUMN IF NOT EXISTS de_quien_llego VARCHAR(255);
+ALTER TABLE inventario ADD COLUMN IF NOT EXISTS precio_pagado DECIMAL(10, 2);
+ALTER TABLE inventario ADD COLUMN IF NOT EXISTS quien_recibio VARCHAR(255);
  
 -- Tabla de Estantes (configuración)
 CREATE TABLE IF NOT EXISTS estantes (
