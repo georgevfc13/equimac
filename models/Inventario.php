@@ -1,10 +1,4 @@
 <?php
-/**
- * Modelo: Inventario
- * Archivo: models/Inventario.php
- * Responsabilidad: Gestionar todas las operaciones de BD para inventario
- */
-
 require_once __DIR__ . '/../config/database.php';
 
 class Inventario {
@@ -16,9 +10,6 @@ class Inventario {
         $this->db = getDB();
     }
 
-    /**
-     * CRUD: CREATE - Crear un nuevo producto
-     */
     public function crear($datos) {
         $sql = "INSERT INTO {$this->table} 
                 (codigo, descripcion, unidad, cantidad, marca, equipo, aplicacion, estante, entrepaño, posicion, estado, tipo_maquinaria, de_quien_llego, precio_pagado, quien_recibio) 
@@ -56,9 +47,6 @@ class Inventario {
         return ['exito' => true, 'id' => $this->db->insert_id];
     }
 
-    /**
-     * CRUD: READ - Obtener todos los productos
-     */
     public function obtenerTodos($filtro = null) {
         $sql = "SELECT * FROM {$this->table}";
 
@@ -90,9 +78,6 @@ class Inventario {
         return $productos;
     }
 
-    /**
-     * CRUD: READ - Obtener un producto por ID
-     */
     public function obtenerPorId($id) {
         $sql = "SELECT * FROM {$this->table} WHERE id = ?";
 
@@ -110,9 +95,6 @@ class Inventario {
         return $producto;
     }
 
-    /**
-     * CRUD: UPDATE - Actualizar un producto
-     */
     public function actualizar($id, $datos) {
         $sql = "UPDATE {$this->table} 
                 SET descripcion = ?, unidad = ?, cantidad = ?, marca = ?, 
@@ -152,9 +134,6 @@ class Inventario {
         return ['exito' => true];
     }
 
-    /**
-     * CRUD: DELETE - Eliminar un producto
-     */
     public function eliminar($id) {
         $sql = "DELETE FROM {$this->table} WHERE id = ?";
 
@@ -172,9 +151,6 @@ class Inventario {
         return ['exito' => true];
     }
 
-    /**
-     * Obtener todas las marcas únicas
-     */
     public function obtenerMarcas() {
         $sql = "SELECT DISTINCT marca FROM {$this->table} 
                 WHERE marca IS NOT NULL AND marca != '' 
@@ -190,9 +166,6 @@ class Inventario {
         return $marcas;
     }
 
-    /**
-     * Obtener todos los tipos de máquinaria
-     */
     public function obtenerTiposMaquinaria() {
         $sql = "SELECT DISTINCT tipo_maquinaria FROM {$this->table} 
                 WHERE tipo_maquinaria IS NOT NULL AND tipo_maquinaria != '' 
@@ -208,17 +181,10 @@ class Inventario {
         return $tipos;
     }
 
-    /**
-     * Obtener todas las unidades de medida
-     */
     public function obtenerUnidades() {
-        $unidades = ['Pieza', 'Unidad', 'Metro', 'Kilogramo', 'Litro', 'Caja', 'Paquete', 'Rollo', 'Bobina', 'Set'];
-        return $unidades;
+        return ['Pieza', 'Unidad', 'Metro', 'Kilogramo', 'Litro', 'Caja', 'Paquete', 'Rollo', 'Bobina', 'Set'];
     }
 
-    /**
-     * Obtener todos los estantes
-     */
     public function obtenerEstantes() {
         $sql = "SELECT * FROM {$this->table_estantes} ORDER BY numero ASC";
         $resultado = $this->db->query($sql);
@@ -231,9 +197,6 @@ class Inventario {
         return $estantes;
     }
 
-    /**
-     * Obtener un estante por número
-     */
     public function obtenerEstante($numero) {
         $sql = "SELECT * FROM {$this->table_estantes} WHERE numero = ?";
         $stmt = $this->db->prepare($sql);
@@ -250,9 +213,6 @@ class Inventario {
         return $estante;
     }
 
-    /**
-     * Obtener posiciones ocupadas en una fila del estante
-     */
     public function obtenerPosicionesOcupadas($estante, $entrepaño) {
         $sql = "SELECT posicion, codigo, descripcion FROM {$this->table} 
                 WHERE estante = ? AND entrepaño = ? AND posicion IS NOT NULL
@@ -276,9 +236,6 @@ class Inventario {
         return $posiciones;
     }
 
-    /**
-     * Obtener estadísticas del inventario
-     */
     public function obtenerEstadisticas() {
         $sql = "SELECT 
                 COUNT(*) as total_productos,
@@ -291,9 +248,6 @@ class Inventario {
         return $resultado->fetch_assoc();
     }
 
-    /**
-     * Obtener productos por estante y entrepaño
-     */
     public function obtenerProductosPorUbicacion($estante, $entrepaño) {
         $sql = "SELECT * FROM {$this->table} WHERE estante = ? AND entrepaño = ? ORDER BY codigo ASC";
 
@@ -315,9 +269,6 @@ class Inventario {
         return $productos;
     }
 
-    /**
-     * Verificar si un código ya existe
-     */
     public function codigoExiste($codigo, $id_excluir = null) {
         $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE codigo = ?";
         

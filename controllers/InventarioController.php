@@ -1,10 +1,4 @@
 <?php
-/**
- * Controlador: InventarioController
- * Archivo: controllers/InventarioController.php
- * Responsabilidad: Procesar peticiones, coordinar modelo y vista
- */
-
 require_once __DIR__ . '/../models/Inventario.php';
 
 class InventarioController {
@@ -16,9 +10,6 @@ class InventarioController {
         $this->modelo = new Inventario();
     }
 
-    /**
-     * Acción: Listar todos los productos
-     */
     public function listar() {
         $filtro = $_GET['buscar'] ?? null;
         $productos = $this->modelo->obtenerTodos($filtro);
@@ -33,9 +24,6 @@ class InventarioController {
         ]);
     }
 
-    /**
-     * Acción: Ver detalles completos de un producto
-     */
     public function detalles() {
         $id = $_GET['id'] ?? null;
 
@@ -52,10 +40,7 @@ class InventarioController {
             return $this->listar();
         }
 
-        // Obtener información del estante
         $estante = $this->modelo->obtenerEstante($producto['estante']);
-        
-        // Obtener productos en la misma ubicación
         $productosEnUbicacion = $this->modelo->obtenerProductosPorUbicacion(
             $producto['estante'],
             $producto['entrepaño']
@@ -68,9 +53,6 @@ class InventarioController {
         ]);
     }
 
-    /**
-     * Acción: Mostrar formulario para crear o editar producto
-     */
     public function formulario() {
         $id = $_GET['id'] ?? null;
         $producto = null;
@@ -99,9 +81,6 @@ class InventarioController {
         ]);
     }
 
-    /**
-     * Acción: Guardar producto (crear o actualizar)
-     */
     public function guardar() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: index.php');
@@ -125,7 +104,6 @@ class InventarioController {
         $precio_pagado = floatval($_POST['precio_pagado'] ?? 0) ?: null;
         $quien_recibio = trim($_POST['quien_recibio'] ?? '') ?: null;
 
-        // Validaciones
         $errores = $this->validar($codigo, $descripcion, $unidad, $cantidad, $estante, $entrepaño, $id);
 
         if (!empty($errores)) {
@@ -134,7 +112,6 @@ class InventarioController {
             return $this->formulario();
         }
 
-        // Verificar código único (excepto si es edición del mismo producto)
         if ($this->modelo->codigoExiste($codigo, $id)) {
             $this->mensaje = 'El código de producto ya existe';
             $this->tipo_mensaje = 'error';
@@ -178,9 +155,6 @@ class InventarioController {
         return $this->listar();
     }
 
-    /**
-     * Acción: Eliminar producto
-     */
     public function eliminar() {
         $id = $_GET['id'] ?? null;
 
@@ -210,36 +184,26 @@ class InventarioController {
         return $this->listar();
     }
 
-    /**
-     * Acción: Mostrar visualización de estantes
-     */
     public function estantes() {
         $estante_seleccionado = $_GET['estante'] ?? '';
-        
-        // Obtener todos los productos
         $todosProductos = $this->modelo->obtenerTodos();
         
-        // Obtener estantes disponibles
         $estantes_disponibles = [];
         $estantes = [];
         $estantes_stats = [];
         
-        // Organizar productos por estante y posición
         foreach ($todosProductos as $producto) {
             $estante_num = $producto['estante'];
             $fila_num = $producto['entrepaño'];
             
-            // Registrar estantes disponibles
             if (!in_array($estante_num, $estantes_disponibles)) {
                 $estantes_disponibles[] = $estante_num;
             }
             
-            // Filtrar si se especificó un estante
             if ($estante_seleccionado && $estante_num != $estante_seleccionado) {
                 continue;
             }
             
-            // Inicializar estructura
             if (!isset($estantes[$estante_num])) {
                 $estantes[$estante_num] = [];
                 $estantes_stats[$estante_num] = [
@@ -253,15 +217,11 @@ class InventarioController {
                 $estantes[$estante_num][$fila_num] = [];
             }
             
-            // Agregar producto
-            $posicion = 1; // Por defecto, posición 1
+            $posicion = 1;
             $estantes[$estante_num][$fila_num][$posicion] = $producto;
-            
-            // Estadísticas
             $estantes_stats[$estante_num]['ocupadas']++;
         }
         
-        // Crear posiciones vacías (5 por fila)
         $posiciones_por_fila = 5;
         foreach ($estantes as $estante_num => $filas) {
             foreach ($filas as $fila_num => $posiciones) {
@@ -275,8 +235,6 @@ class InventarioController {
         }
         
         sort($estantes_disponibles);
-        
-        // Obtener productos disponibles para el modal
         $productos_disponibles = $this->modelo->obtenerTodos();
         
         $this->renderizar('views/estantes.php', [
@@ -290,9 +248,6 @@ class InventarioController {
         ]);
     }
 
-    /**
-     * Acción: Agregar producto a una posición específica del estante
-     */
     public function agregar_a_posicion() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Content-Type: application/json');
@@ -312,16 +267,11 @@ class InventarioController {
             exit;
         }
 
-        // Aquí iría la lógica para actualizar el producto en esa posición
-        // Por ahora, retornamos éxito
         header('Content-Type: application/json');
         echo json_encode(['success' => true, 'mensaje' => 'Producto agregado exitosamente']);
         exit;
     }
 
-    /**
-     * Validar datos del formulario
-     */
     private function validar($codigo, $descripcion, $unidad, $cantidad, $estante, $entrepaño, $id = null) {
         $errores = [];
 
@@ -352,9 +302,6 @@ class InventarioController {
         return $errores;
     }
 
-    /**
-     * Renderizar vista con datos
-     */
     private function renderizar($vista, $datos = []) {
         extract($datos);
         require 'views/layout.php';
