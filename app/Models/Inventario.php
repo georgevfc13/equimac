@@ -173,5 +173,23 @@ final class Inventario
         $stmt->execute([':e' => $estante, ':f' => $entrepaño]);
         return $stmt->fetchAll() ?: [];
     }
+
+    public function posicionesOcupadasPorEstante(int $estante): array
+    {
+        $stmt = $this->db->prepare("SELECT entrepaño, posicion FROM inventario WHERE estante = :e");
+        $stmt->execute([':e' => $estante]);
+        $rows = $stmt->fetchAll() ?: [];
+        
+        $result = [];
+        foreach ($rows as $row) {
+            $fila = (int)$row['entrepaño'];
+            $pos = (int)$row['posicion'];
+            if (!isset($result[$fila])) {
+                $result[$fila] = [];
+            }
+            $result[$fila][$pos] = true;
+        }
+        return $result;
+    }
 }
 

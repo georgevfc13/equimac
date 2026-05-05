@@ -180,7 +180,7 @@
   }
 
   // Estantes: selector de tamaño (filas × columnas) estilo Word
-  function remountTablePicker(root) {
+  function remountTablePicker(root, ocupadas = null) {
     if (!root) return;
     delete root.dataset.equimacPickerMounted;
     const oldGrid = root.querySelector('.js-picker-grid') || root.querySelector('[data-grid]');
@@ -188,10 +188,10 @@
       const fresh = oldGrid.cloneNode(false);
       oldGrid.parentNode.replaceChild(fresh, oldGrid);
     }
-    mountOneTablePicker(root);
+    mountOneTablePicker(root, ocupadas);
   }
 
-  function mountOneTablePicker(root) {
+  function mountOneTablePicker(root, ocupadas = null) {
     if (!root || root.dataset.equimacPickerMounted === '1') return;
 
     let max = parseInt(String(root.getAttribute('data-max') || '20'), 10);
@@ -200,8 +200,8 @@
 
     const grid = root.querySelector('.js-picker-grid') || root.querySelector('[data-grid]');
     const label = root.querySelector('.js-picker-label') || root.querySelector('[data-label]');
-    const inpR = root.querySelector('.js-picker-filas') || root.querySelector('input[name="filas"]');
-    const inpC = root.querySelector('.js-picker-columnas') || root.querySelector('input[name="columnas"]');
+    const inpR = root.querySelector('.js-picker-filas') || root.querySelector('input[name="entrepaño"]') || root.querySelector('input[name="filas"]');
+    const inpC = root.querySelector('.js-picker-columnas') || root.querySelector('input[name="posicion"]') || root.querySelector('input[name="columnas"]');
     if (!grid || !inpR || !inpC) return;
 
     let dr = parseInt(String(root.getAttribute('data-default-rows') || inpR.value || '5'), 10);
@@ -216,7 +216,7 @@
     inpR.value = String(selR);
     inpC.value = String(selC);
 
-    grid.style.gridTemplateColumns = `repeat(${max}, 14px)`;
+    grid.style.gridTemplateColumns = `repeat(${max}, 18px)`;
     grid.innerHTML = '';
     const cells = [];
     for (let r = 1; r <= max; r++) {
@@ -226,6 +226,13 @@
         btn.className = 'table-size-picker-cell';
         btn.dataset.r = String(r);
         btn.dataset.c = String(c);
+        
+        // Marcar si está ocupada
+        if (ocupadas && ocupadas[r] && ocupadas[r][c]) {
+          btn.classList.add('is-occupied');
+          btn.disabled = true;
+        }
+        
         grid.appendChild(btn);
         cells.push(btn);
       }
@@ -235,16 +242,16 @@
       cells.forEach((btn) => {
         const r = parseInt(btn.dataset.r, 10);
         const c = parseInt(btn.dataset.c, 10);
-        btn.classList.toggle('is-hover', r <= hoverR && c <= hoverC);
+        btn.classList.toggle('is-hover', !btn.classList.contains('is-occupied') && r <= hoverR && c <= hoverC);
       });
       if (label) {
-        label.textContent = `Seleccionado: ${hoverR} fila(s) × ${hoverC} posición(es)`;
+        label.textContent = `Seleccionado: Fila ${hoverR} · Posición ${hoverC}`;
       }
     };
 
     grid.addEventListener('mouseover', (e) => {
       const t = e.target.closest('.table-size-picker-cell');
-      if (!t || !grid.contains(t)) return;
+      if (!t || !grid.contains(t) || t.classList.contains('is-occupied')) return;
       hoverR = parseInt(t.dataset.r, 10);
       hoverC = parseInt(t.dataset.c, 10);
       paint();
@@ -258,7 +265,7 @@
 
     grid.addEventListener('click', (e) => {
       const t = e.target.closest('.table-size-picker-cell');
-      if (!t || !grid.contains(t)) return;
+      if (!t || !grid.contains(t) || t.classList.contains('is-occupied')) return;
       e.preventDefault();
       selR = parseInt(t.dataset.r, 10);
       selC = parseInt(t.dataset.c, 10);
@@ -273,6 +280,65 @@
     paint();
   }
 
+  // Manejar selector de estante dinámico en formulario
+  function initEstanteSelector() {
+    const select = document.getElementById('js-estante-select');
+    if (!select) {
+      console.log('Select no encontrado');
+      return;
+    }
+
+    const container = document.getElementById('js-picker-container');
+    const placeholder = document.getElementById('js-picker-placeholder');
+    if (!container || !placeholder) {
+      console.log('Container o placeholder no encontrado', { container, placeholder });
+      return;
+    }
+
+    const updatePicker = async () => {
+      const selected = select.options[select.selectedIndex];
+      const filas = parseInt(selected.getAttribute('data-filas') || '5', 10);
+      const columnas = parseInt(selected.getAttribute('data-columnas') || '5', 10);
+      const estante = select.value;
+      
+      console.log('updatePicker:', { estante, filas, columnas, selected: selected.textContent });
+
+      if (estante === '0') {
+        container.style.display = 'none';
+        placeholder.style.display = '';
+        return;
+      }
+
+      placeholder.style.display = 'none';
+      container.style.display = 'block';
+
+      const picker = container.querySelector('[data-table-picker]');
+      if (picker) {
+        picker.setAttribute('data-default-rows', String(filas));
+        picker.setAttribute('data-default-cols', String(columnas));
+        picker.setAttribute('data-max', String(Math.max(filas, columnas, 12)));
+        
+        // Cargar ocupadas desde API
+        let ocupadas = {};
+        try {
+          const resp = await fetch(u(`api/estante/${estante}/posiciones`));
+          const data = await resp.json();
+          console.log('API response:', data);
+          if (data.ok) {
+            ocupadas = data.ocupadas || {};
+          }
+        } catch (err) {
+          console.warn('No se pudo cargar ocupadas:', err);
+        }
+        
+        remountTablePicker(picker, ocupadas);
+      }
+    };
+
+    select.addEventListener('change', updatePicker);
+    updatePicker();
+  }
+
   function initTableSizePickers() {
     $$('[data-table-picker]').forEach((root) => {
       const modal = root.closest('#modal-nuevo-estante');
@@ -282,8 +348,13 @@
         }
         return;
       }
-      mountOneTablePicker(root);
+      // Solo montar si no es el picker dinámico del formulario
+      if (!root.closest('#js-picker-container')) {
+        mountOneTablePicker(root);
+      }
     });
+    // Inicializar selector dinámico
+    initEstanteSelector();
   }
 
   if (document.readyState === 'loading') {

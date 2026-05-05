@@ -19,15 +19,17 @@
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
+html{ height:100%; }
 body{
   margin:0;
+  min-height:100vh;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   background:
     radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.35), transparent 55%),
     radial-gradient(900px 700px at 80% 30%, rgba(34,197,94,.22), transparent 55%),
     radial-gradient(700px 700px at 60% 90%, rgba(59,130,246,.18), transparent 60%),
     var(--bg);
+  background-attachment: fixed;
   color: var(--text);
 }
 
@@ -39,7 +41,7 @@ a{ color: inherit; }
 }
 
 .app-shell{
-  min-height:100%;
+  min-height:100vh;
   display:flex;
   flex-direction:column;
 }
@@ -159,6 +161,11 @@ main{ flex:1; padding: 22px 0 56px; }
   box-shadow: var(--shadow);
 }
 .card.pad{ padding:16px; }
+.card.scrollable{
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
 .stats{
   display:grid;
@@ -364,33 +371,46 @@ footer{
 /* Selector tipo “insertar tabla” (Word) para filas × columnas */
 .table-size-picker{
   display:inline-block;
-  padding: 12px;
+  padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.22);
+  border: 2px solid var(--line);
+  background: rgba(0,0,0,.45);
 }
 .table-size-picker-grid{
   display: grid;
-  gap: 3px;
+  gap: 5px;
   user-select: none;
 }
 .table-size-picker-cell{
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid rgba(255,255,255,.25);
+  background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(34,197,94,.10));
   padding: 0;
   cursor: pointer;
+  transition: all 180ms ease;
+}
+.table-size-picker-cell:hover:not(.is-occupied){
+  border-color: rgba(124,58,237,.60);
+  background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(34,197,94,.25));
 }
 .table-size-picker-cell.is-hover{
-  background: rgba(124,58,237,.55);
-  border-color: rgba(124,58,237,.75);
+  background: linear-gradient(135deg, rgba(124,58,237,.75), rgba(34,197,94,.50));
+  border-color: rgba(124,58,237,.95);
+  box-shadow: 0 0 12px rgba(124,58,237,.40);
+}
+.table-size-picker-cell.is-occupied{
+  background: linear-gradient(135deg, rgba(239,68,68,.70), rgba(239,68,68,.50));
+  border-color: rgba(239,68,68,.95);
+  cursor: not-allowed;
+  box-shadow: 0 0 8px rgba(239,68,68,.30);
 }
 .table-size-picker-label{
-  margin-top: 10px;
+  margin-top: 14px;
   font-size: 13px;
   color: var(--muted);
+  font-weight: 500;
 }
 
 @media (max-width: 920px){

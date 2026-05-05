@@ -58,7 +58,7 @@ $content .= '
       <button type="button" class="icon-btn" data-close-modal aria-label="Cerrar">✕</button>
     </div>
     <form method="POST" action="'.e(url('estantes/guardar')).'">
-      <div class="modal-body">
+      <div class="modal-body" style="max-height: calc(100vh - 300px); overflow-y: auto;">
         <div class="form-grid">
           <div class="field">
             <label>Número de estante *</label>

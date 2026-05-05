@@ -47,6 +47,7 @@ try {
     $router->post('/salida/guardar', [App\Controllers\SalidaController::class, 'store']);
 
     // API (JSON)
+    $router->get('/api/estante/{estante}/posiciones', [App\Controllers\ApiController::class, 'posicionesEstante']);
     $router->get('/api/posiciones-ocupadas', [App\Controllers\ApiController::class, 'posicionesOcupadas']);
     $router->get('/api/inventario/buscar', [App\Controllers\ApiController::class, 'buscarInventario']);
     $router->post('/api/inventario/eliminar', [App\Controllers\ApiController::class, 'eliminarInventario']);

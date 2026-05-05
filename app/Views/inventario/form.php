@@ -65,26 +65,32 @@ $content = '
 
       <div class="field">
         <label>Estante *</label>
-        <select name="estante">
+        <select id="js-estante-select" name="estante">
           <option value="0">Selecciona…</option>';
 foreach (($estantes ?? []) as $e) {
     $sel = ((int)($item['estante'] ?? 0) === (int)$e['numero']) ? 'selected' : '';
-    $content .= '<option value="'.(int)$e['numero'].'" '.$sel.'>Estante '.(int)$e['numero'].' · '.e($e['descripcion'] ?? '').'</option>';
+    $content .= '<option value="'.(int)$e['numero'].'" data-filas="'.(int)($e['filas'] ?? 5).'" data-columnas="'.(int)($e['columnas'] ?? 5).'" '.$sel.'>Estante '.(int)$e['numero'].' · '.e($e['descripcion'] ?? '').'</option>';
 }
 $content .= '
         </select>
         '.fieldError($errors, 'estante').'
       </div>
 
-      <div class="field">
-        <label>Fila (entrepaño) *</label>
-        <input type="number" min="1" name="entrepaño" value="'.e((string)($item['entrepaño'] ?? 1)).'" />
+      <div class="field" style="grid-column:1/-1">
+        <label>Ubicación en el estante *</label>
+        <p class="help" style="margin-bottom:12px; font-size:13px">Selecciona una fila y posición en la cuadrícula</p>
+        <div id="js-picker-container" style="display:none">
+          <div class="table-size-picker" data-table-picker data-max="20">
+            <div class="table-size-picker-grid js-picker-grid" data-grid></div>
+            <div class="table-size-picker-label js-picker-label" data-label></div>
+          </div>
+          <input type="hidden" name="entrepaño" class="js-picker-filas" value="1" />
+          <input type="hidden" name="posicion" class="js-picker-columnas" value="1" />
+        </div>
+        <div id="js-picker-placeholder" style="color:rgba(255,255,255,.5); font-size:13px">
+          Selecciona un estante primero…
+        </div>
         '.fieldError($errors, 'entrepaño').'
-      </div>
-
-      <div class="field">
-        <label>Posición *</label>
-        <input type="number" min="1" name="posicion" value="'.e((string)($item['posicion'] ?? 1)).'" />
         '.fieldError($errors, 'posicion').'
       </div>
 
