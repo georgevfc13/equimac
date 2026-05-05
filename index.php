@@ -1,41 +1,13 @@
 <?php
-date_default_timezone_set('America/Mexico_City');
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
+declare(strict_types=1);
 
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/controllers/InventarioController.php';
+// Fallback entrypoint when Apache ignores .htaccess (shows directory listing).
+// Redirect to /public app.
 
-$accion = $_GET['accion'] ?? 'listar';
-$controlador = new InventarioController();
+$script = (string)($_SERVER['SCRIPT_NAME'] ?? '/equimac/index.php');
+$base = rtrim(str_replace('\\', '/', dirname($script)), '/');
+$target = ($base !== '' ? $base : '') . '/public/inventario';
 
-try {
-    switch ($accion) {
-        case 'listar':
-            $controlador->listar();
-            break;
-        case 'formulario':
-            $controlador->formulario();
-            break;
-        case 'guardar':
-            $controlador->guardar();
-            break;
-        case 'eliminar':
-            $controlador->eliminar();
-            break;
-        case 'estantes':
-            $controlador->estantes();
-            break;
-        case 'agregar_a_posicion':
-            $controlador->agregar_a_posicion();
-            break;
-        default:
-            $controlador->listar();
-            break;
-    }
-} catch (Exception $e) {
-    $mensaje = "Error: " . $e->getMessage();
-    $tipo_mensaje = 'error';
-    require __DIR__ . '/views/layout.php';
-}
-?>
+header('Location: ' . $target, true, 302);
+exit;
+
