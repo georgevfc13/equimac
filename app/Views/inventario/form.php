@@ -9,7 +9,7 @@ $id = $item['id'] ?? null;
 
 function fieldError(array $errors, string $key): string {
   if (!isset($errors[$key])) return '';
-  return '<div class="help" style="color: rgba(239,68,68,.95)">'.e($errors[$key]).'</div>';
+  return '<div class="help" style="color: #ef4444">'.e($errors[$key]).'</div>';
 }
 
 $content = '
@@ -87,7 +87,7 @@ $content .= '
           <input type="hidden" name="entrepaño" class="js-picker-filas" value="1" />
           <input type="hidden" name="posicion" class="js-picker-columnas" value="1" />
         </div>
-        <div id="js-picker-placeholder" style="color:rgba(255,255,255,.5); font-size:13px">
+        <div id="js-picker-placeholder" style="color:var(--muted); font-size:13px">
           Selecciona un estante primero…
         </div>
         '.fieldError($errors, 'entrepaño').'
