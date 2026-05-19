@@ -176,7 +176,7 @@ final class Inventario
 
     public function posicionesOcupadasPorEstante(int $estante): array
     {
-        $stmt = $this->db->prepare("SELECT entrepaño, posicion FROM inventario WHERE estante = :e");
+        $stmt = $this->db->prepare("SELECT DISTINCT entrepaño, posicion FROM inventario WHERE estante = :e");
         $stmt->execute([':e' => $estante]);
         $rows = $stmt->fetchAll() ?: [];
         

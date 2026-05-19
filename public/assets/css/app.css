@@ -466,38 +466,57 @@ footer{
 }
 .table-size-picker-grid{
   display: grid;
-  gap: 5px;
+  gap: 6px;
   user-select: none;
+  padding: 8px;
+  background: rgba(248, 250, 252, .5);
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, .15);
 }
 .table-size-picker-cell{
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 2px solid rgba(59, 130, 246, .3);
-  background: linear-gradient(135deg, rgba(59, 130, 246, .2), rgba(14, 165, 233, .15));
+  min-width: 32px;
+  min-height: 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 2px solid rgba(59, 130, 246, .4);
+  background: linear-gradient(135deg, rgba(59, 130, 246, .15), rgba(14, 165, 233, .1));
   padding: 0;
   cursor: pointer;
   transition: all 180ms ease;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, .1);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, .08);
+  font-size: 0;
 }
-.table-size-picker-cell:hover:not(.is-occupied){
+.table-size-picker-cell:hover:not(.is-occupied):not(.is-disabled){
   border-color: rgba(59, 130, 246, .7);
-  background: linear-gradient(135deg, rgba(59, 130, 246, .4), rgba(14, 165, 233, .3));
+  background: linear-gradient(135deg, rgba(59, 130, 246, .3), rgba(14, 165, 233, .25));
   box-shadow: 0 4px 8px rgba(59, 130, 246, .2);
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 .table-size-picker-cell.is-hover{
   background: linear-gradient(135deg, #3b82f6, #0ea5e9);
   border-color: #3b82f6;
-  box-shadow: 0 0 12px rgba(59, 130, 246, .6);
-  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(59, 130, 246, .6), inset 0 0 6px rgba(255,255,255,.3);
+  transform: scale(1.12);
   animation: cellPulse 300ms ease;
 }
 .table-size-picker-cell.is-occupied{
-  background: linear-gradient(135deg, rgba(239, 68, 68, .4), rgba(239, 68, 68, .3));
-  border-color: rgba(239, 68, 68, .7);
+  background: linear-gradient(135deg, rgba(239, 68, 68, .5), rgba(239, 68, 68, .4));
+  border-color: rgba(239, 68, 68, .8);
   cursor: not-allowed;
-  box-shadow: 0 0 8px rgba(239, 68, 68, .3);
+  box-shadow: 0 0 10px rgba(239, 68, 68, .4), inset 0 0 4px rgba(0,0,0,.1);
+  position: relative;
+}
+.table-size-picker-cell.is-occupied::after{
+  content: "✕";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: rgba(239, 68, 68, .6);
+  font-weight: bold;
 }
 .table-size-picker-label{
   margin-top: 14px;
@@ -505,6 +524,7 @@ footer{
   color: var(--brand);
   font-weight: 600;
   animation: labelSlide 220ms ease;
+  text-align: center;
 }
 
 @keyframes cellPulse {

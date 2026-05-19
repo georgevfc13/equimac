@@ -7,14 +7,15 @@ use App\Models\Inventario;
 
 final class ApiController
 {
-    public function posicionesEstante(): void
+    public function posicionesEstante(string $estante): void
     {
-        $estante = (int)($_GET['estante'] ?? 0);
-        if ($estante <= 0) {
+        $estanteId = (int)$estante;
+        if ($estanteId <= 0) {
             json(['ok' => false, 'message' => 'Estante inválido'], 422);
+            return;
         }
 
-        $items = (new Inventario())->posicionesOcupadasPorEstante($estante);
+        $items = (new Inventario())->posicionesOcupadasPorEstante($estanteId);
         json(['ok' => true, 'ocupadas' => $items]);
     }
 

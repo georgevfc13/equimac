@@ -112,8 +112,8 @@ foreach (($estantes ?? []) as $e) {
       <div class="muted" style="font-size:12px; margin-top:4px">'.e($e['ubicacion'] ?? '').'</div>
     </div>
     <div class="row" style="align-items:flex-start">
-      <span class="badge"><span class="dot warn"></span>'.$filas.' filas</span>
-      <span class="badge"><span class="dot"></span>'.$cols.' posiciones</span>
+      <span class="badge"><span class="dot warn"></span><span style="color: black">'.$filas.' filas</span></span>
+      <span class="badge"><span class="dot"></span><span style="color: black">'.$cols.' posiciones</span></span>
       <form method="POST" action="'.e(url('estantes/'.$eid.'/eliminar')).'" onsubmit="return confirm(\'¿Eliminar el estante #'.$num.'? Solo si no tiene productos.\');">
         <button type="submit" class="btn danger">Eliminar estante</button>
       </form>
@@ -146,7 +146,7 @@ foreach (($estantes ?? []) as $e) {
                   </a>
                 </td>';
             } else {
-                $content .= '<td><span class="badge" style="opacity:.55"><span class="dot good"></span>Libre</span></td>';
+                $content .= '<td><span class="badge" style="background-color:#f0f0f0; color:#666"><span class="dot good"></span>Libre</span></td>';
             }
         }
         $content .= '</tr>';
