@@ -17,10 +17,10 @@
       <div class="container">
         <div class="topbar-inner">
           <a class="brand" href="<?= e(url('inventario')) ?>">
-            <span class="logo" aria-hidden="true"></span>
+            <img src="./public/assets/icons/logo.png" alt="" width="40" height="40" />
             <span>
               <h1>EQUIMAC</h1>
-              <small>Inventario local · UI vNext</small>
+              <small>Manejo de inventario de la empresa Equimac</small>
             </span>
           </a>
           <nav class="nav" aria-label="Principal">
@@ -42,8 +42,8 @@
     <footer>
       <div class="container">
         <div class="row" style="justify-content:space-between">
-          <div>Localhost only · Sin auth · 2026</div>
-          <div class="muted">Tip: usa búsqueda instantánea y acciones rápidas</div>
+          <div>Pagina local</div>
+          <div class="muted">Para uso interno de Equimac</div>
         </div>
       </div>
     </footer>
@@ -52,7 +52,7 @@
   <script>
     window.__EQUIMAC_BASE__ = <?= json_encode(base_url(), JSON_UNESCAPED_SLASHES) ?>;
   </script>
-  <script src="<?= e(url('assets/js/app.js')) ?>"></script>
+  <script src="<?= e(url('assets/js/app.js?v=' . time())) ?>"></script>
 </body>
 </html>
 

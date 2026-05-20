@@ -60,8 +60,8 @@ foreach ($items as $p) {
             '.(!empty($p['equipo']) ? '<div class="muted" style="margin-top:6px;font-size:12px">📌 '.e($p['equipo']).'</div>' : '').'
           </td>
           <td>'.(!empty($p['marca']) ? '<span class="badge"><span class="dot"></span>'.e($p['marca']).'</span>' : '<span class="muted">—</span>').'</td>
-          <td><span class="badge"><span class="dot warn"></span>Est. '.(int)$p['estante'].' · F'.(int)$p['entrepaño'].' · P'.(int)$p['posicion'].'</span></td>
-          <td><span class="badge"><span class="dot good"></span>'.(int)$p['cantidad'].' '.e($p['unidad']).'</span></td>
+          <td><span class="badge"><span class="dot warn"></span> <span style="color: #000000">Est. '.(int)$p['estante'].' · F'.(int)$p['entrepaño'].' · P'.(int)$p['posicion'].'</span></td>
+          <td><span class="badge"><span class="dot good"></span> <span style="color: #000000">'.(int)$p['cantidad'].' '.e($p['unidad']).'</span></td>
           <td>
             <div class="row" style="gap:10px">
               <a class="btn" href="'.e(url('inventario/'.(int)$p['id'])).'">Ver</a>

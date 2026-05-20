@@ -181,21 +181,22 @@
 
   // Estantes: selector de tamaño (filas × columnas) estilo Word
   function remountTablePicker(root, ocupadas = null) {
-    if (!root) {
-      console.log('[EQUIMAC] remountTablePicker: root is null');
-      return;
-    }
+    if (!root) return;
     
     delete root.dataset.equimacPickerMounted;
     
     const grid = root.querySelector('.js-picker-grid') || root.querySelector('[data-grid]');
+    
     if (grid) {
       grid.innerHTML = '';
       grid.style.gridTemplateColumns = '';
     }
     
-    console.log('[EQUIMAC] remountTablePicker: calling mountOneTablePicker');
-    mountOneTablePicker(root, ocupadas);
+    try {
+      mountOneTablePicker(root, ocupadas);
+    } catch (e) {
+      console.error('[EQUIMAC] Error mounting picker:', e.message);
+    }
   }
 
   function mountOneTablePicker(root, ocupadas = null) {
@@ -207,10 +208,11 @@
 
     const grid = root.querySelector('.js-picker-grid') || root.querySelector('[data-grid]');
     const label = root.querySelector('.js-picker-label') || root.querySelector('[data-label]');
-    const inpR = root.querySelector('.js-picker-filas') || root.querySelector('input[name="entrepaño"]') || root.querySelector('input[name="filas"]');
-    const inpC = root.querySelector('.js-picker-columnas') || root.querySelector('input[name="posicion"]') || root.querySelector('input[name="columnas"]');
+    const inpR = root.querySelector('.js-picker-filas') || root.querySelector('input[name="entrepaño"]');
+    const inpC = root.querySelector('.js-picker-columnas') || root.querySelector('input[name="posicion"]');
+    
     if (!grid || !inpR || !inpC) {
-      console.log('Missing elements in mountOneTablePicker:', { grid: !!grid, inpR: !!inpR, inpC: !!inpC });
+      console.error('[EQUIMAC] Missing elements in picker');
       return;
     }
 
@@ -226,15 +228,15 @@
     inpR.value = String(selR);
     inpC.value = String(selC);
 
-    // Usar las dimensiones reales del estante, no max
+    // Usar las dimensiones reales del estante
     const gridRows = dr;
     const gridCols = dc;
+    
+    console.log('[EQUIMAC] Grid dimensions:', { gridRows, gridCols });
     
     grid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
     grid.innerHTML = '';
     const cells = [];
-    
-    console.log('Creating picker grid:', { gridRows, gridCols, ocupadas: !!ocupadas });
     
     for (let r = 1; r <= gridRows; r++) {
       for (let c = 1; c <= gridCols; c++) {
@@ -256,8 +258,6 @@
       }
     }
     
-    console.log('Buttons created:', cells.length);
-
     const paint = () => {
       cells.forEach((btn) => {
         const r = parseInt(btn.dataset.r, 10);
@@ -298,7 +298,6 @@
 
     root.dataset.equimacPickerMounted = '1';
     paint();
-    console.log('Picker mount completed');
   }
 
   // Manejar selector de estante dinámico en formulario
@@ -317,7 +316,6 @@
     }
 
     const updatePicker = async () => {
-      console.log('[EQUIMAC] updatePicker called, select value:', select.value);
       const selected = select.options[select.selectedIndex];
       const filas = parseInt(selected.getAttribute('data-filas') || '5', 10);
       const columnas = parseInt(selected.getAttribute('data-columnas') || '5', 10);
@@ -333,6 +331,7 @@
       container.style.display = 'block';
 
       const picker = container.querySelector('[data-table-picker]');
+      
       if (picker) {
         picker.setAttribute('data-default-rows', String(filas));
         picker.setAttribute('data-default-cols', String(columnas));
@@ -357,12 +356,10 @@
 
     // Attach listener with explicit binding
     const handleChange = () => {
-      console.log('[EQUIMAC] Change event triggered on select');
       updatePicker();
     };
     
     select.addEventListener('change', handleChange);
-    console.log('[EQUIMAC] Change listener attached to select');
     
     // Ejecutar al cargar si hay un estante seleccionado
     if (select && select.value !== '0') {

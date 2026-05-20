@@ -83,9 +83,9 @@ $content .= '
           <div class="table-size-picker" data-table-picker data-max="20">
             <div class="table-size-picker-grid js-picker-grid" data-grid></div>
             <div class="table-size-picker-label js-picker-label" data-label></div>
+            <input type="hidden" name="entrepaño" class="js-picker-filas" value="1" />
+            <input type="hidden" name="posicion" class="js-picker-columnas" value="1" />
           </div>
-          <input type="hidden" name="entrepaño" class="js-picker-filas" value="1" />
-          <input type="hidden" name="posicion" class="js-picker-columnas" value="1" />
         </div>
         <div id="js-picker-placeholder" style="color:var(--muted); font-size:13px">
           Selecciona un estante primero…
