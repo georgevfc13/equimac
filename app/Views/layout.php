@@ -17,7 +17,7 @@
       <div class="container">
         <div class="topbar-inner">
           <a class="brand" href="<?= e(url('inventario')) ?>">
-            <img src="./public/assets/icons/logo.png" alt="" width="40" height="40" />
+            <img src="<?= e(url('assets/icons/logo.png')) ?>" alt="EQUIMAC Logo" width="40" height="40" />
             <span>
               <h1>EQUIMAC</h1>
               <small>Manejo de inventario de la empresa Equimac</small>

@@ -494,6 +494,11 @@ footer{
   transform: scale(1.08);
 }
 .table-size-picker-cell.is-hover{
+  background: linear-gradient(135deg, rgba(59, 130, 246, .4), rgba(14, 165, 233, .3));
+  border-color: rgba(59, 130, 246, .6);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, .3);
+}
+.table-size-picker-cell.is-selected{
   background: linear-gradient(135deg, #3b82f6, #0ea5e9);
   border-color: #3b82f6;
   box-shadow: 0 0 12px rgba(59, 130, 246, .6), inset 0 0 6px rgba(255,255,255,.3);

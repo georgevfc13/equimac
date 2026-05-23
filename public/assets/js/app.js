@@ -262,10 +262,13 @@
       cells.forEach((btn) => {
         const r = parseInt(btn.dataset.r, 10);
         const c = parseInt(btn.dataset.c, 10);
-        btn.classList.toggle('is-hover', !btn.classList.contains('is-occupied') && r <= hoverR && c <= hoverC);
+        const isSelected = r === selR && c === selC;
+        const isHover = r === hoverR && c === hoverC && !btn.classList.contains('is-occupied');
+        btn.classList.toggle('is-selected', isSelected);
+        btn.classList.toggle('is-hover', isHover && !isSelected);
       });
       if (label) {
-        label.textContent = `Seleccionado: Fila ${hoverR} · Posición ${hoverC}`;
+        label.textContent = `Seleccionado: Fila ${selR} · Posición ${selC}`;
       }
     };
 
