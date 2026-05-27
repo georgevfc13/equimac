@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS estantes (
 CREATE TABLE IF NOT EXISTS inventario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   codigo VARCHAR(80) NOT NULL UNIQUE,
+  nombre VARCHAR(160) NOT NULL,
   descripcion TEXT NOT NULL,
   unidad VARCHAR(60) NOT NULL,
   cantidad INT NOT NULL DEFAULT 0,
@@ -51,7 +52,7 @@ CREATE TABLE IF NOT EXISTS inventario (
   fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   INDEX idx_ubicacion (estante, entrepaño, posicion),
-  INDEX idx_busqueda (codigo, marca, equipo)
+  INDEX idx_busqueda (nombre, codigo, marca, equipo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================================

@@ -7,6 +7,7 @@ use App\Models\Estantes;
 use App\Models\Inventario;
 use App\Models\Entradas;
 use App\Models\Salidas;
+use App\Support\ExcelExport;
 use App\Support\Response;
 
 final class InventarioController
@@ -41,6 +42,13 @@ final class InventarioController
             'lowStockItems' => $lowStockItems,
             'outOfStockIds' => $outOfStockIds,
         ]));
+    }
+
+    /** Exporta inventario a Excel con formato (encabezados azules, cuerpo gris). */
+    public function exportExcel(): void
+    {
+        $items = $this->inv->all('');
+        ExcelExport::inventario($items);
     }
 
     public function show(string $id): Response
@@ -99,6 +107,7 @@ final class InventarioController
 
         $data = [
             'codigo' => trim((string)($_POST['codigo'] ?? '')),
+            'nombre' => trim((string)($_POST['nombre'] ?? '')),
             'descripcion' => trim((string)($_POST['descripcion'] ?? '')),
             'unidad' => trim((string)($_POST['unidad'] ?? '')),
             'cantidad' => (int)($_POST['cantidad'] ?? 0),
@@ -166,6 +175,7 @@ final class InventarioController
     {
         $errors = [];
         if ($data['codigo'] === '') $errors['codigo'] = 'El código es requerido.';
+        if ($data['nombre'] === '') $errors['nombre'] = 'El nombre es requerido.';
         if ($data['descripcion'] === '') $errors['descripcion'] = 'La descripción es requerida.';
         if ($data['unidad'] === '') $errors['unidad'] = 'La unidad es requerida.';
         if ((int)$data['cantidad'] < 0) $errors['cantidad'] = 'La cantidad no puede ser negativa.';

@@ -33,6 +33,11 @@ $content = '
         '.fieldError($errors, 'codigo').'
       </div>
       <div class="field">
+        <label>Nombre *</label>
+        <input name="nombre" value="'.e($item['nombre'] ?? '').'" placeholder="Ej. Aceite 10W-40" />
+        '.fieldError($errors, 'nombre').'
+      </div>
+      <div class="field">
         <label>Unidad *</label>
         <input name="unidad" value="'.e($item['unidad'] ?? '').'" placeholder="Pieza / Unidad / Caja…" />
         '.fieldError($errors, 'unidad').'

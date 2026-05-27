@@ -27,12 +27,13 @@ $content = '
 
 <div class="card pad">
   <div class="toolbar">
-    <div class="search" title="Busca por código, descripción, marca o equipo">
+    <div class="search" title="Busca por nombre, marca o equipo">
       <span aria-hidden="true">⌕</span>
-      <input id="js-search" autocomplete="off" placeholder="Buscar (instantáneo)…" value="'.e($q ?? '').'" />
+      <input id="js-search" autocomplete="off" placeholder="Buscar por nombre…" value="'.e($q ?? '').'" />
       <span class="muted" style="font-size:12px">Resultados: <strong id="js-counter">'.count($items).'</strong></span>
     </div>
     <div class="row">
+      <a class="btn" href="'.e(url('inventario/exportar')).'">Exportar a Excel</a>
       <a class="btn" href="'.e(url('estantes')).'">Ver estantes</a>
     </div>
   </div>
@@ -58,7 +59,10 @@ foreach ($items as $p) {
     $trClass = $isOutOfStock ? ' class="out-of-stock"' : '';
     $content .= '
         <tr' . $trClass . ' data-product-id="'.(int)$p['id'].'">
-          <td class="mono"><strong>'.e($p['codigo']).'</strong></td>
+          <td class="mono">
+            <strong>'.e($p['codigo']).'</strong>
+            <div class="muted" style="margin-top:6px;font-size:12px;font-family: ui-sans-serif, system-ui;">'.e($p['nombre'] ?? '').'</div>
+          </td>
           <td>
             <div>'.e($p['descripcion']).'</div>
             '.(!empty($p['equipo']) ? '<div class="muted" style="margin-top:6px;font-size:12px">📌 '.e($p['equipo']).'</div>' : '').'
@@ -70,7 +74,7 @@ foreach ($items as $p) {
             <div class="row" style="gap:10px">
               <a class="btn" href="'.e(url('inventario/'.(int)$p['id'])).'">Ver</a>
               <a class="btn" href="'.e(url('inventario/'.(int)$p['id'].'/editar')).'">Editar</a>
-              <button class="btn danger" data-quick-delete="'.(int)$p['id'].'" data-quick-name="'.e($p['descripcion']).'">Eliminar</button>
+              <button class="btn danger" data-quick-delete="'.(int)$p['id'].'" data-quick-name="'.e(($p['nombre'] ?? $p['descripcion'] ?? '')).'">Eliminar</button>
             </div>
           </td>
         </tr>';
@@ -87,15 +91,6 @@ $content .= '
     <a class="btn primary" href="'.e(url('inventario/nuevo')).'">+ Crear producto</a>
   </div>
 </div>';
-
-// Data para mostrar notificación de stock bajo
-$content .= '
-<script id="js-low-stock-data" type="application/json">
-' . json_encode([
-    'lowStockItems' => $lowStockItems ?? [],
-    'outOfStockIds' => $outOfStockIds ?? [],
-], JSON_UNESCAPED_SLASHES) . '
-</script>';
 
 echo view('layout', [
   'title' => $title ?? 'Inventario',

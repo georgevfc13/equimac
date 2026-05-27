@@ -34,13 +34,13 @@ final class Inventario
     public function all(string $q = ''): array
     {
         if ($q === '') {
-            $stmt = $this->db->query("SELECT * FROM inventario ORDER BY estante, entrepaño, posicion, codigo");
+            $stmt = $this->db->query("SELECT * FROM inventario ORDER BY estante, entrepaño, posicion, nombre, codigo");
             return $stmt->fetchAll() ?: [];
         }
 
         $sql = "SELECT * FROM inventario
-                WHERE codigo LIKE :q OR descripcion LIKE :q OR marca LIKE :q OR equipo LIKE :q
-                ORDER BY estante, entrepaño, posicion, codigo";
+                WHERE nombre LIKE :q OR marca LIKE :q OR equipo LIKE :q
+                ORDER BY estante, entrepaño, posicion, nombre, codigo";
         $stmt = $this->db->prepare($sql);
         $like = '%' . $q . '%';
         $stmt->execute([':q' => $like]);
@@ -84,12 +84,13 @@ final class Inventario
     public function create(array $data): int
     {
         $sql = "INSERT INTO inventario
-                (codigo, descripcion, unidad, cantidad, stock_minimo, marca, equipo, aplicacion, estante, entrepaño, posicion, estado, tipo_maquinaria, de_quien_llego, precio_pagado, quien_recibio, fecha_creacion, fecha_actualizacion)
+                (codigo, nombre, descripcion, unidad, cantidad, stock_minimo, marca, equipo, aplicacion, estante, entrepaño, posicion, estado, tipo_maquinaria, de_quien_llego, precio_pagado, quien_recibio, fecha_creacion, fecha_actualizacion)
                 VALUES
-                (:codigo, :descripcion, :unidad, :cantidad, :stock_minimo, :marca, :equipo, :aplicacion, :estante, :entrepano, :posicion, :estado, :tipo_maquinaria, :de_quien_llego, :precio_pagado, :quien_recibio, NOW(), NOW())";
+                (:codigo, :nombre, :descripcion, :unidad, :cantidad, :stock_minimo, :marca, :equipo, :aplicacion, :estante, :entrepano, :posicion, :estado, :tipo_maquinaria, :de_quien_llego, :precio_pagado, :quien_recibio, NOW(), NOW())";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':codigo' => $data['codigo'],
+            ':nombre' => $data['nombre'],
             ':descripcion' => $data['descripcion'],
             ':unidad' => $data['unidad'],
             ':cantidad' => (int)$data['cantidad'],
@@ -113,6 +114,7 @@ final class Inventario
     public function update(int $id, array $data): void
     {
         $sql = "UPDATE inventario SET
+                  nombre = :nombre,
                   descripcion = :descripcion,
                   unidad = :unidad,
                   cantidad = :cantidad,
@@ -133,6 +135,7 @@ final class Inventario
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':id' => $id,
+            ':nombre' => $data['nombre'],
             ':descripcion' => $data['descripcion'],
             ':unidad' => $data['unidad'],
             ':cantidad' => (int)$data['cantidad'],
@@ -172,7 +175,7 @@ final class Inventario
 
     public function posicionesOcupadas(int $estante, int $entrepaño): array
     {
-        $stmt = $this->db->prepare("SELECT posicion, codigo, descripcion FROM inventario WHERE estante = :e AND entrepaño = :f ORDER BY posicion");
+        $stmt = $this->db->prepare("SELECT posicion, codigo, nombre FROM inventario WHERE estante = :e AND entrepaño = :f ORDER BY posicion");
         $stmt->execute([':e' => $estante, ':f' => $entrepaño]);
         return $stmt->fetchAll() ?: [];
     }
@@ -198,10 +201,10 @@ final class Inventario
     /** Obtiene productos con stock bajo o en cero */
     public function lowStockItems(): array
     {
-        $sql = "SELECT id, codigo, descripcion, cantidad, stock_minimo 
+        $sql = "SELECT id, codigo, nombre, cantidad, stock_minimo 
                 FROM inventario 
                 WHERE cantidad <= stock_minimo 
-                ORDER BY cantidad ASC, codigo";
+                ORDER BY cantidad ASC, nombre, codigo";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll() ?: [];
     }
@@ -209,10 +212,10 @@ final class Inventario
     /** Obtiene productos con stock en cero */
     public function outOfStockItems(): array
     {
-        $sql = "SELECT id, codigo, descripcion, cantidad 
+        $sql = "SELECT id, codigo, nombre, cantidad 
                 FROM inventario 
                 WHERE cantidad = 0 
-                ORDER BY codigo";
+                ORDER BY nombre, codigo";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll() ?: [];
     }

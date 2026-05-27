@@ -83,6 +83,24 @@
     }
   });
 
+  // Kardex: impresión (entradas / salidas / ambos)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-print-kardex]');
+    if (!btn) return;
+    e.preventDefault();
+    const mode = String(btn.getAttribute('data-print-kardex') || 'ambos');
+    document.body.dataset.printKardex = mode;
+    window.print();
+    // Cleanup (algunos navegadores disparan afterprint)
+    setTimeout(() => {
+      delete document.body.dataset.printKardex;
+    }, 250);
+  });
+
+  window.addEventListener('afterprint', () => {
+    delete document.body.dataset.printKardex;
+  });
+
   // Instant search (Inventario)
   const search = $('#js-search');
   let searchAbort = null;
@@ -121,9 +139,12 @@
         }
         tr.setAttribute('data-product-id', String(p.id));
         tr.innerHTML = `
-          <td class="mono"><strong>${escapeHtml(p.codigo)}</strong></td>
+          <td class="mono">
+            <strong>${escapeHtml(p.codigo)}</strong>
+            <div class="muted" style="margin-top:6px;font-size:12px;font-family: ui-sans-serif, system-ui;">${escapeHtml(p.nombre || '')}</div>
+          </td>
           <td>
-            <div>${escapeHtml(p.descripcion)}</div>
+            <div>${escapeHtml(p.descripcion || '')}</div>
             <div class="muted" style="margin-top:6px;font-size:12px">${p.equipo ? '📌 ' + escapeHtml(p.equipo) : ''}</div>
           </td>
           <td>${p.marca ? `<span class="badge"><span class="dot"></span>${escapeHtml(p.marca)}</span>` : '<span class="muted">—</span>'}</td>
@@ -133,7 +154,7 @@
             <div class="row" style="gap:10px">
               <a class="btn" href="${u(`inventario/${Number(p.id)}`)}" ${isOutOfStock ? 'style="pointer-events: none; opacity: 0.5;" title="Producto sin stock"' : ''}>Ver</a>
               <a class="btn" href="${u(`inventario/${Number(p.id)}/editar`)}" ${isOutOfStock ? 'style="pointer-events: none; opacity: 0.5;" title="Producto sin stock"' : ''}>Editar</a>
-              <button class="btn danger" data-quick-delete="${Number(p.id)}" data-quick-name="${escapeAttr(p.descripcion)}">Eliminar</button>
+              <button class="btn danger" data-quick-delete="${Number(p.id)}" data-quick-name="${escapeAttr(p.nombre || p.descripcion || '')}">Eliminar</button>
             </div>
           </td>
         `;
@@ -244,6 +265,10 @@
     inpR.value = String(selR);
     inpC.value = String(selC);
 
+    // "Nuevo estante" (filas×columnas) usa rectángulo tipo Word; "Nuevo producto"
+    // (entrepaño×posicion) debe seguir siendo una celda única.
+    const isSizeMode = String(inpR.getAttribute('name') || '') === 'filas' && String(inpC.getAttribute('name') || '') === 'columnas';
+
     // Usar las dimensiones reales del estante
     const gridRows = dr;
     const gridCols = dc;
@@ -278,13 +303,31 @@
       cells.forEach((btn) => {
         const r = parseInt(btn.dataset.r, 10);
         const c = parseInt(btn.dataset.c, 10);
-        const isSelected = r === selR && c === selC;
-        const isHover = r === hoverR && c === hoverC && !btn.classList.contains('is-occupied');
-        btn.classList.toggle('is-selected', isSelected);
-        btn.classList.toggle('is-hover', isHover && !isSelected);
+        const isOccupied = btn.classList.contains('is-occupied');
+        const canHighlight = !isOccupied;
+
+        let isSelected;
+        let isHover;
+        if (isSizeMode) {
+          // Rectángulo anclado en (1,1): se nota cuántos cuadros incluye.
+          isSelected = r <= selR && c <= selC;
+          isHover = r <= hoverR && c <= hoverC;
+        } else {
+          // Selección puntual para ubicación exacta del producto.
+          isSelected = r === selR && c === selC;
+          isHover = r === hoverR && c === hoverC;
+        }
+
+        btn.classList.toggle('is-selected', isSelected && canHighlight);
+        btn.classList.toggle('is-hover', isHover && !isSelected && canHighlight);
       });
       if (label) {
-        label.textContent = `Seleccionado: Fila ${selR} · Posición ${selC}`;
+        if (isSizeMode) {
+          const cuadros = selR * selC;
+          label.textContent = `Filas: ${selR} · Paños: ${selC} · ${cuadros} cuadros`;
+        } else {
+          label.textContent = `Seleccionado: Fila ${selR} · Posición ${selC}`;
+        }
       }
     };
 
@@ -413,7 +456,44 @@
   // Stock bajo: notificación y desactivación de productos sin stock
   function initStockNotifications() {
     const dataEl = document.getElementById('js-low-stock-data');
-    if (!dataEl) return;
+    const bell = document.getElementById('js-notif-bell');
+    const badge = document.getElementById('js-notif-badge');
+    const panel = document.getElementById('js-notif-panel');
+    const list = document.getElementById('js-notif-list');
+    const empty = document.getElementById('js-notif-empty');
+    const closeBtn = document.getElementById('js-notif-close');
+
+    const setOpen = (open) => {
+      if (!panel || !bell) return;
+      panel.style.display = open ? '' : 'none';
+      bell.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+
+    if (bell && panel) {
+      bell.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isOpen = panel.style.display !== 'none';
+        setOpen(!isOpen);
+      });
+      if (closeBtn) closeBtn.addEventListener('click', () => setOpen(false));
+      document.addEventListener('click', (e) => {
+        if (panel.style.display === 'none') return;
+        const inside = e.target.closest('#js-notif-panel') || e.target.closest('#js-notif-bell');
+        if (!inside) setOpen(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
+      });
+    }
+
+    // Si la página no trae data de stock (solo inventario index), dejar el panel vacío.
+    if (!dataEl) {
+      if (bell) bell.classList.remove('is-active');
+      if (badge) badge.style.display = 'none';
+      if (empty) empty.textContent = 'No hay notificaciones.';
+      if (list) list.innerHTML = '';
+      return;
+    }
 
     let data;
     try {
@@ -440,61 +520,54 @@
     });
 
     // Mostrar notificación de stock bajo si hay
-    if (lowStockItems.length > 0) {
-      const plural = lowStockItems.length === 1 ? 'producto' : 'productos';
-      const items = lowStockItems
-        .slice(0, 3)
-        .map((item) => `${item.descripcion} (${item.cantidad}/${item.stock_minimo})`)
-        .join(', ');
-      const more = lowStockItems.length > 3 ? ` y ${lowStockItems.length - 3} más` : '';
+    // En vez de spamear toasts al cargar, agrupar en un panel accesible con campana.
+    if (bell && badge) {
+      if (lowStockItems.length > 0) {
+        bell.classList.add('is-active');
+        badge.textContent = String(lowStockItems.length);
+        badge.style.display = '';
+      } else {
+        bell.classList.remove('is-active');
+        badge.style.display = 'none';
+      }
+    }
 
-      const toastEl = document.createElement('div');
-      toastEl.className = 'toast-low-stock';
-      toastEl.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
-          <div style="flex: 1;">
-            <div style="font-weight: 800; font-size: 13px;">⚠️ Stock bajo</div>
-            <div style="margin-top: 6px; color: rgba(255,255,255,.72); font-size: 12px;">
-              ${lowStockItems.length} ${plural} con inventario bajo: ${items}${more}
+    if (list && empty) {
+      list.innerHTML = '';
+      if (!lowStockItems.length) {
+        empty.style.display = '';
+      } else {
+        empty.style.display = 'none';
+        const frag = document.createDocumentFragment();
+        lowStockItems.forEach((it) => {
+          const codigo = it.codigo ? String(it.codigo) : '';
+          const desc = it.nombre ? String(it.nombre) : (it.descripcion ? String(it.descripcion) : 'Producto');
+          const cantidad = Number(it.cantidad ?? 0);
+          const min = Number(it.stock_minimo ?? 0);
+          const id = it.id != null ? Number(it.id) : null;
+
+          const el = document.createElement('div');
+          el.className = 'notif-item';
+          el.innerHTML = `
+            <div class="t">
+              <span>${escapeHtml(codigo ? `${codigo} · ${desc}` : desc)}</span>
+              <span style="color: var(--warn); font-weight: 900;">${cantidad}/${min}</span>
             </div>
-          </div>
-          <button class="toast-close-btn" aria-label="Cerrar notificación" style="background: none; border: none; color: rgba(255,255,255,.6); cursor: pointer; font-size: 18px; padding: 0; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">×</button>
-        </div>
-      `;
-      toastEl.style.cssText = `
-        width: min(420px, calc(100vw - 32px));
-        border-radius: 16px;
-        padding: 12px 12px;
-        background: linear-gradient(135deg, rgba(245, 158, 11, .15), rgba(239, 68, 68, .1));
-        border: 1px solid rgba(245, 158, 11, .35);
-        box-shadow: 0 2px 8px rgba(59, 130, 246, .08);
-        backdrop-filter: blur(10px);
-        transform: translateY(10px);
-        opacity: 0;
-        animation: toastIn 260ms ease forwards;
-        margin-bottom: 10px;
-      `;
+            <div class="m">Inventario bajo. Recomendado reabastecer.</div>
+          `;
 
-      stack().appendChild(toastEl);
+          if (id && Number.isFinite(id)) {
+            el.style.cursor = 'pointer';
+            el.title = 'Abrir producto';
+            el.addEventListener('click', () => {
+              location.href = u(`inventario/${id}`);
+            });
+          }
 
-      // Cerrar notificación al hacer clic en el botón
-      const closeBtn = toastEl.querySelector('.toast-close-btn');
-      closeBtn.addEventListener('click', () => {
-        toastEl.style.opacity = '0';
-        toastEl.style.transform = 'translateY(8px)';
-        toastEl.style.transition = 'all 220ms ease';
-        setTimeout(() => toastEl.remove(), 260);
-      });
-
-      // Auto-cerrar después de 8 segundos (más tiempo que los toasts normales)
-      setTimeout(() => {
-        if (toastEl.parentNode) {
-          toastEl.style.opacity = '0';
-          toastEl.style.transform = 'translateY(8px)';
-          toastEl.style.transition = 'all 220ms ease';
-          setTimeout(() => toastEl.remove(), 260);
-        }
-      }, 8000);
+          frag.appendChild(el);
+        });
+        list.appendChild(frag);
+      }
     }
   }
 

@@ -29,8 +29,8 @@ if ($flash === 'creado') {
 $oeNum = (string)($old_estante['numero'] ?? '');
 $oeDesc = (string)($old_estante['descripcion'] ?? '');
 $oeUbi = (string)($old_estante['ubicacion'] ?? '');
-$oeFilas = min(20, max(1, (int)($old_estante['filas'] ?? 5)));
-$oeCols = min(20, max(1, (int)($old_estante['columnas'] ?? 5)));
+$oeFilas = min(20, max(1, (int)($old_estante['filas'] ?? 10)));
+$oeCols = min(20, max(1, (int)($old_estante['columnas'] ?? 10)));
 
 $content = '
 <div class="page-head">
@@ -75,8 +75,8 @@ $content .= '
           </div>
         </div>
         <div style="height:14px"></div>
-        <div class="field">
-          <label>Tamaño del estante (filas × posiciones)</label>
+          <div class="field">
+          <label>Tamaño del estante (filas × paños)</label>
           <p class="help" style="margin:0 0 8px">Pasa el cursor por la cuadrícula y haz clic, como al insertar una tabla en Word.</p>
           <div class="table-size-picker" data-table-picker data-max="20" data-default-rows="'.(int)$oeFilas.'" data-default-cols="'.(int)$oeCols.'">
             <input type="hidden" name="filas" class="js-picker-filas" value="'.(int)$oeFilas.'" />
