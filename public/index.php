@@ -14,6 +14,7 @@ require_once __DIR__ . '/../app/Support/Database.php';
 
 require_once __DIR__ . '/../app/Models/Estantes.php';
 require_once __DIR__ . '/../app/Models/Inventario.php';
+require_once __DIR__ . '/../app/Models/Entradas.php';
 require_once __DIR__ . '/../app/Models/Salidas.php';
 
 require_once __DIR__ . '/../app/Controllers/HomeController.php';

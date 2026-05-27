@@ -2,6 +2,8 @@
 /** @var array $items */
 /** @var array $stats */
 /** @var string $q */
+/** @var array $lowStockItems */
+/** @var array $outOfStockIds */
 
 $statsHtml = '
 <div class="stats">
@@ -38,7 +40,7 @@ $content = '
   <div style="height:12px"></div>
 
   <div class="table-wrap">
-    <table>
+    <table id="js-inventory-table" data-out-of-stock-ids="<?= e(json_encode($outOfStockIds ?? [], JSON_UNESCAPED_SLASHES)) ?>">
       <thead>
         <tr>
           <th>Código</th>
@@ -52,8 +54,10 @@ $content = '
       <tbody id="js-table-body">';
 
 foreach ($items as $p) {
+    $isOutOfStock = in_array($p['id'], $outOfStockIds ?? []);
+    $trClass = $isOutOfStock ? ' class="out-of-stock"' : '';
     $content .= '
-        <tr>
+        <tr' . $trClass . ' data-product-id="'.(int)$p['id'].'">
           <td class="mono"><strong>'.e($p['codigo']).'</strong></td>
           <td>
             <div>'.e($p['descripcion']).'</div>
@@ -83,6 +87,15 @@ $content .= '
     <a class="btn primary" href="'.e(url('inventario/nuevo')).'">+ Crear producto</a>
   </div>
 </div>';
+
+// Data para mostrar notificación de stock bajo
+$content .= '
+<script id="js-low-stock-data" type="application/json">
+' . json_encode([
+    'lowStockItems' => $lowStockItems ?? [],
+    'outOfStockIds' => $outOfStockIds ?? [],
+], JSON_UNESCAPED_SLASHES) . '
+</script>';
 
 echo view('layout', [
   'title' => $title ?? 'Inventario',

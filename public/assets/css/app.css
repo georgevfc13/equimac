@@ -302,6 +302,26 @@ tbody tr{
 tbody tr:hover{
   background: rgba(59, 130, 246, .08);
 }
+tbody tr.out-of-stock{
+  opacity: 0.5;
+  background: rgba(239, 68, 68, .04) !important;
+}
+tbody tr.out-of-stock:hover{
+  opacity: 0.6;
+  background: rgba(239, 68, 68, .08) !important;
+}
+tbody tr.out-of-stock td,
+tbody tr.out-of-stock button,
+tbody tr.out-of-stock a{
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+tbody tr.out-of-stock .btn{
+  pointer-events: auto;
+}
+tbody tr.out-of-stock .btn.danger{
+  opacity: 1;
+}
 .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
 .muted{ color: var(--muted); }
 

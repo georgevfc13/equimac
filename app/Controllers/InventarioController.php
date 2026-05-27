@@ -5,17 +5,23 @@ namespace App\Controllers;
 
 use App\Models\Estantes;
 use App\Models\Inventario;
+use App\Models\Entradas;
+use App\Models\Salidas;
 use App\Support\Response;
 
 final class InventarioController
 {
     private Inventario $inv;
     private Estantes $estantes;
+    private Entradas $entradas;
+    private Salidas $salidas;
 
     public function __construct()
     {
         $this->inv = new Inventario();
         $this->estantes = new Estantes();
+        $this->entradas = new Entradas();
+        $this->salidas = new Salidas();
     }
 
     public function index(): Response
@@ -23,6 +29,8 @@ final class InventarioController
         $q = trim((string)($_GET['q'] ?? ''));
         $items = $this->inv->all($q);
         $stats = $this->inv->stats();
+        $lowStockItems = $this->inv->lowStockItems();
+        $outOfStockIds = array_map(fn($item) => $item['id'], $this->inv->outOfStockItems());
 
         return Response::html(view('inventario/index', [
             'title' => 'Inventario',
@@ -30,6 +38,8 @@ final class InventarioController
             'items' => $items,
             'stats' => $stats,
             'q' => $q,
+            'lowStockItems' => $lowStockItems,
+            'outOfStockIds' => $outOfStockIds,
         ]));
     }
 
@@ -41,10 +51,15 @@ final class InventarioController
             return Response::html(view('error/404', ['title' => 'Producto no encontrado']), 404);
         }
 
+        $entradas = $this->entradas->byInventarioId($pid);
+        $salidas = $this->salidas->byInventarioId($pid);
+
         return Response::html(view('inventario/show', [
             'title' => 'Detalle · ' . $item['codigo'],
             'active' => 'inventario',
             'item' => $item,
+            'entradas' => $entradas,
+            'salidas' => $salidas,
         ]));
     }
 
@@ -87,6 +102,7 @@ final class InventarioController
             'descripcion' => trim((string)($_POST['descripcion'] ?? '')),
             'unidad' => trim((string)($_POST['unidad'] ?? '')),
             'cantidad' => (int)($_POST['cantidad'] ?? 0),
+            'stock_minimo' => (int)($_POST['stock_minimo'] ?? 5),
             'marca' => trim((string)($_POST['marca'] ?? '')),
             'equipo' => trim((string)($_POST['equipo'] ?? '')),
             'aplicacion' => trim((string)($_POST['aplicacion'] ?? '')),
@@ -119,6 +135,19 @@ final class InventarioController
             redirect('/inventario/' . $id);
         } else {
             $newId = $this->inv->create($data);
+            
+            // Registrar la entrada inicial del producto
+            if ($data['cantidad'] > 0) {
+                $this->entradas->create([
+                    'inventario_id' => $newId,
+                    'codigo' => $data['codigo'],
+                    'cantidad' => $data['cantidad'],
+                    'quien_entrego' => $data['de_quien_llego'],
+                    'quien_recibio' => $data['quien_recibio'],
+                    'observaciones' => 'Entrada inicial al crear producto',
+                ]);
+            }
+            
             redirect('/inventario/' . $newId);
         }
     }
@@ -143,6 +172,12 @@ final class InventarioController
         if ((int)$data['estante'] <= 0) $errors['estante'] = 'Selecciona un estante.';
         if ((int)$data['entrepaño'] <= 0) $errors['entrepaño'] = 'Selecciona una fila.';
         if ((int)$data['posicion'] <= 0) $errors['posicion'] = 'Selecciona una posición.';
+
+        // Requerir información de entrada para nuevos productos
+        if (!$id) {
+            if ($data['de_quien_llego'] === '') $errors['de_quien_llego'] = 'Debe indicarse de quién llegó el producto.';
+            if ($data['quien_recibio'] === '') $errors['quien_recibio'] = 'Debe indicarse quién recibió el producto.';
+        }
 
         if ($data['codigo'] !== '' && $this->inv->codigoExists($data['codigo'], $id)) {
             $errors['codigo'] = 'Ese código ya existe.';

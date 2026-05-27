@@ -50,6 +50,11 @@ $content = '
         '.fieldError($errors, 'cantidad').'
       </div>
       <div class="field">
+        <label>Stock mínimo</label>
+        <input type="number" min="0" name="stock_minimo" value="'.e((string)($item['stock_minimo'] ?? 5)).'" placeholder="5" title="Cantidad mínima antes de mostrar alerta de stock bajo" />
+        <div class="help" style="font-size:12px;color:var(--muted)">Cantidad mínima que genera alerta (por defecto: 5)</div>
+      </div>
+      <div class="field">
         <label>Estado</label>
         <input name="estado" value="'.e($item['estado'] ?? '').'" placeholder="Activo / Inactivo / Mantenimiento…" />
       </div>
@@ -98,6 +103,22 @@ $content .= '
         <label>Precio pagado</label>
         <input type="number" step="0.01" min="0" name="precio_pagado" value="'.e((string)($item['precio_pagado'] ?? '')).'" />
       </div>
+
+      '.(!$isEdit ? '<div class="field" style="grid-column:1/-1;border-top:2px solid rgba(59, 130, 246, .15);padding-top:16px;margin-top:8px">
+        <div class="muted" style="font-size:11px; letter-spacing:.12em; text-transform:uppercase">Información de Entrada</div>
+      </div>' : '').'
+
+      '.(!$isEdit ? '<div class="field">
+        <label>De quién llegó *</label>
+        <input name="de_quien_llego" value="'.e($item['de_quien_llego'] ?? '').'" placeholder="Proveedor / Persona que entregó…" />
+        '.fieldError($errors, 'de_quien_llego').'
+      </div>' : '').'
+
+      '.(!$isEdit ? '<div class="field">
+        <label>Quién recibió *</label>
+        <input name="quien_recibio" value="'.e($item['quien_recibio'] ?? '').'" placeholder="Nombre de quién recibió…" />
+        '.fieldError($errors, 'quien_recibio').'
+      </div>' : '').'
     </div>
 
     <div class="modal-foot" style="padding-left:0;padding-right:0;border-top:none;background:transparent">

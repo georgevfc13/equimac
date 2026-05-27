@@ -133,7 +133,7 @@ foreach (($estantes ?? []) as $e) {
       </thead>
       <tbody>';
 
-    for ($f = $filas; $f >= 1; $f--) {
+    for ($f = 1; $f <= $filas; $f++) {
         $content .= '<tr><td class="mono"><strong>F'.$f.'</strong></td>';
         for ($p = 1; $p <= $cols; $p++) {
             $prod = $map[$num][$f][$p] ?? null;

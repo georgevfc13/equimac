@@ -101,9 +101,25 @@
       empty.style.display = 'none';
       if (counter) counter.textContent = String(items.length);
 
+      // Obtener lista de IDs fuera de stock
+      const table = document.getElementById('js-inventory-table');
+      let outOfStockIds = [];
+      if (table && table.dataset.outOfStockIds) {
+        try {
+          outOfStockIds = JSON.parse(table.dataset.outOfStockIds);
+        } catch {
+          outOfStockIds = [];
+        }
+      }
+
       const frag = document.createDocumentFragment();
       items.forEach((p) => {
         const tr = document.createElement('tr');
+        const isOutOfStock = outOfStockIds.includes(Number(p.id));
+        if (isOutOfStock) {
+          tr.className = 'out-of-stock';
+        }
+        tr.setAttribute('data-product-id', String(p.id));
         tr.innerHTML = `
           <td class="mono"><strong>${escapeHtml(p.codigo)}</strong></td>
           <td>
@@ -115,8 +131,8 @@
           <td><span class="badge"><span class="dot good"></span>${Number(p.cantidad)} ${escapeHtml(p.unidad)}</span></td>
           <td>
             <div class="row" style="gap:10px">
-              <a class="btn" href="${u(`inventario/${Number(p.id)}`)}">Ver</a>
-              <a class="btn" href="${u(`inventario/${Number(p.id)}/editar`)}">Editar</a>
+              <a class="btn" href="${u(`inventario/${Number(p.id)}`)}" ${isOutOfStock ? 'style="pointer-events: none; opacity: 0.5;" title="Producto sin stock"' : ''}>Ver</a>
+              <a class="btn" href="${u(`inventario/${Number(p.id)}/editar`)}" ${isOutOfStock ? 'style="pointer-events: none; opacity: 0.5;" title="Producto sin stock"' : ''}>Editar</a>
               <button class="btn danger" data-quick-delete="${Number(p.id)}" data-quick-name="${escapeAttr(p.descripcion)}">Eliminar</button>
             </div>
           </td>
@@ -392,6 +408,101 @@
     document.addEventListener('DOMContentLoaded', initTableSizePickers);
   } else {
     initTableSizePickers();
+  }
+
+  // Stock bajo: notificación y desactivación de productos sin stock
+  function initStockNotifications() {
+    const dataEl = document.getElementById('js-low-stock-data');
+    if (!dataEl) return;
+
+    let data;
+    try {
+      data = JSON.parse(dataEl.textContent);
+    } catch {
+      return;
+    }
+
+    const lowStockItems = data.lowStockItems || [];
+    const outOfStockIds = data.outOfStockIds || [];
+
+    // Desactivar filas de productos sin stock
+    outOfStockIds.forEach((id) => {
+      const row = document.querySelector(`tr[data-product-id="${id}"]`);
+      if (row) {
+        // Desactivar botones Ver y Editar
+        const links = row.querySelectorAll('a.btn:not(.danger)');
+        links.forEach((link) => {
+          link.style.pointerEvents = 'none';
+          link.style.opacity = '0.5';
+          link.title = 'Producto sin stock';
+        });
+      }
+    });
+
+    // Mostrar notificación de stock bajo si hay
+    if (lowStockItems.length > 0) {
+      const plural = lowStockItems.length === 1 ? 'producto' : 'productos';
+      const items = lowStockItems
+        .slice(0, 3)
+        .map((item) => `${item.descripcion} (${item.cantidad}/${item.stock_minimo})`)
+        .join(', ');
+      const more = lowStockItems.length > 3 ? ` y ${lowStockItems.length - 3} más` : '';
+
+      const toastEl = document.createElement('div');
+      toastEl.className = 'toast-low-stock';
+      toastEl.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+          <div style="flex: 1;">
+            <div style="font-weight: 800; font-size: 13px;">⚠️ Stock bajo</div>
+            <div style="margin-top: 6px; color: rgba(255,255,255,.72); font-size: 12px;">
+              ${lowStockItems.length} ${plural} con inventario bajo: ${items}${more}
+            </div>
+          </div>
+          <button class="toast-close-btn" aria-label="Cerrar notificación" style="background: none; border: none; color: rgba(255,255,255,.6); cursor: pointer; font-size: 18px; padding: 0; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">×</button>
+        </div>
+      `;
+      toastEl.style.cssText = `
+        width: min(420px, calc(100vw - 32px));
+        border-radius: 16px;
+        padding: 12px 12px;
+        background: linear-gradient(135deg, rgba(245, 158, 11, .15), rgba(239, 68, 68, .1));
+        border: 1px solid rgba(245, 158, 11, .35);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, .08);
+        backdrop-filter: blur(10px);
+        transform: translateY(10px);
+        opacity: 0;
+        animation: toastIn 260ms ease forwards;
+        margin-bottom: 10px;
+      `;
+
+      stack().appendChild(toastEl);
+
+      // Cerrar notificación al hacer clic en el botón
+      const closeBtn = toastEl.querySelector('.toast-close-btn');
+      closeBtn.addEventListener('click', () => {
+        toastEl.style.opacity = '0';
+        toastEl.style.transform = 'translateY(8px)';
+        toastEl.style.transition = 'all 220ms ease';
+        setTimeout(() => toastEl.remove(), 260);
+      });
+
+      // Auto-cerrar después de 8 segundos (más tiempo que los toasts normales)
+      setTimeout(() => {
+        if (toastEl.parentNode) {
+          toastEl.style.opacity = '0';
+          toastEl.style.transform = 'translateY(8px)';
+          toastEl.style.transition = 'all 220ms ease';
+          setTimeout(() => toastEl.remove(), 260);
+        }
+      }, 8000);
+    }
+  }
+
+  // Inicializar notificaciones de stock cuando el DOM está listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStockNotifications);
+  } else {
+    initStockNotifications();
   }
 })();
 

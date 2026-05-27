@@ -84,15 +84,16 @@ final class Inventario
     public function create(array $data): int
     {
         $sql = "INSERT INTO inventario
-                (codigo, descripcion, unidad, cantidad, marca, equipo, aplicacion, estante, entrepaño, posicion, estado, tipo_maquinaria, de_quien_llego, precio_pagado, quien_recibio, fecha_creacion, fecha_actualizacion)
+                (codigo, descripcion, unidad, cantidad, stock_minimo, marca, equipo, aplicacion, estante, entrepaño, posicion, estado, tipo_maquinaria, de_quien_llego, precio_pagado, quien_recibio, fecha_creacion, fecha_actualizacion)
                 VALUES
-                (:codigo, :descripcion, :unidad, :cantidad, :marca, :equipo, :aplicacion, :estante, :entrepano, :posicion, :estado, :tipo_maquinaria, :de_quien_llego, :precio_pagado, :quien_recibio, NOW(), NOW())";
+                (:codigo, :descripcion, :unidad, :cantidad, :stock_minimo, :marca, :equipo, :aplicacion, :estante, :entrepano, :posicion, :estado, :tipo_maquinaria, :de_quien_llego, :precio_pagado, :quien_recibio, NOW(), NOW())";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':codigo' => $data['codigo'],
             ':descripcion' => $data['descripcion'],
             ':unidad' => $data['unidad'],
             ':cantidad' => (int)$data['cantidad'],
+            ':stock_minimo' => (int)($data['stock_minimo'] ?? 5),
             ':marca' => $data['marca'] ?: null,
             ':equipo' => $data['equipo'] ?: null,
             ':aplicacion' => $data['aplicacion'] ?: null,
@@ -115,6 +116,7 @@ final class Inventario
                   descripcion = :descripcion,
                   unidad = :unidad,
                   cantidad = :cantidad,
+                  stock_minimo = :stock_minimo,
                   marca = :marca,
                   equipo = :equipo,
                   aplicacion = :aplicacion,
@@ -134,6 +136,7 @@ final class Inventario
             ':descripcion' => $data['descripcion'],
             ':unidad' => $data['unidad'],
             ':cantidad' => (int)$data['cantidad'],
+            ':stock_minimo' => (int)($data['stock_minimo'] ?? 5),
             ':marca' => $data['marca'] ?: null,
             ':equipo' => $data['equipo'] ?: null,
             ':aplicacion' => $data['aplicacion'] ?: null,
@@ -190,6 +193,28 @@ final class Inventario
             $result[$fila][$pos] = true;
         }
         return $result;
+    }
+
+    /** Obtiene productos con stock bajo o en cero */
+    public function lowStockItems(): array
+    {
+        $sql = "SELECT id, codigo, descripcion, cantidad, stock_minimo 
+                FROM inventario 
+                WHERE cantidad <= stock_minimo 
+                ORDER BY cantidad ASC, codigo";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll() ?: [];
+    }
+
+    /** Obtiene productos con stock en cero */
+    public function outOfStockItems(): array
+    {
+        $sql = "SELECT id, codigo, descripcion, cantidad 
+                FROM inventario 
+                WHERE cantidad = 0 
+                ORDER BY codigo";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll() ?: [];
     }
 }
 
