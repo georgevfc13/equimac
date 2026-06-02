@@ -33,6 +33,16 @@ $content = '
         <input type="number" min="1" name="cantidad_usada" value="'.e((string)($o['cantidad_usada'] ?? '')).'" placeholder="1" />
         '.salidaFieldError($errors ?? [], 'cantidad_usada').'
       </div>
+      <div class="field">
+        <label>Fecha de salida *</label>
+        <input type="date" name="fecha_salida" value="'.e((string)($o['fecha_salida'] ?? date('Y-m-d'))).'" required />
+        '.salidaFieldError($errors ?? [], 'fecha_salida').'
+      </div>
+      <div class="field">
+        <label>Hora de salida *</label>
+        <input type="time" name="hora_salida" value="'.e((string)($o['hora_salida'] ?? '')).'" required />
+        '.salidaFieldError($errors ?? [], 'hora_salida').'
+      </div>
       <div class="field" style="grid-column:1/-1">
         <label>Quién recibió *</label>
         <input name="quien_recibio" value="'.e((string)($o['quien_recibio'] ?? '')).'" placeholder="Nombre de quien se lleva el material" />

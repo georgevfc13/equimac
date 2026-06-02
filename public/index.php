@@ -22,6 +22,7 @@ require_once __DIR__ . '/../app/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Controllers/InventarioController.php';
 require_once __DIR__ . '/../app/Controllers/EstantesController.php';
 require_once __DIR__ . '/../app/Controllers/SalidaController.php';
+require_once __DIR__ . '/../app/Controllers/KardexController.php';
 require_once __DIR__ . '/../app/Controllers/ApiController.php';
 
 use App\Support\Router;
@@ -35,11 +36,13 @@ try {
     $router->get('/inventario', [App\Controllers\InventarioController::class, 'index']);
     $router->get('/inventario/exportar', [App\Controllers\InventarioController::class, 'exportExcel']);
     $router->get('/inventario/nuevo', [App\Controllers\InventarioController::class, 'create']);
+    $router->get('/inventario/reabastecer', [App\Controllers\InventarioController::class, 'reabastecer']);
     $router->get('/inventario/{id}', [App\Controllers\InventarioController::class, 'show']);
     $router->get('/inventario/{id}/editar', [App\Controllers\InventarioController::class, 'edit']);
 
     // Actions (POST)
     $router->post('/inventario/guardar', [App\Controllers\InventarioController::class, 'storeOrUpdate']);
+    $router->post('/inventario/reabastecer', [App\Controllers\InventarioController::class, 'storeReabastecimiento']);
     $router->post('/inventario/{id}/eliminar', [App\Controllers\InventarioController::class, 'destroy']);
 
     $router->get('/estantes', [App\Controllers\EstantesController::class, 'index']);
@@ -48,6 +51,8 @@ try {
 
     $router->get('/salida', [App\Controllers\SalidaController::class, 'form']);
     $router->post('/salida/guardar', [App\Controllers\SalidaController::class, 'store']);
+
+    $router->get('/kardex', [App\Controllers\KardexController::class, 'index']);
 
     // API (JSON)
     $router->get('/api/estante/{estante}/posiciones', [App\Controllers\ApiController::class, 'posicionesEstante']);

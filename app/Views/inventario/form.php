@@ -39,7 +39,22 @@ $content = '
       </div>
       <div class="field">
         <label>Unidad *</label>
-        <input name="unidad" value="'.e($item['unidad'] ?? '').'" placeholder="Pieza / Unidad / Caja…" />
+        <select name="unidad" required>
+          <option value="">Selecciona una unidad…</option>
+          <option value="Pieza" '.($item['unidad'] ?? '' === 'Pieza' ? 'selected' : '').'>Pieza</option>
+          <option value="kg" '.($item['unidad'] ?? '' === 'kg' ? 'selected' : '').'>Kilogramo (kg)</option>
+          <option value="g" '.($item['unidad'] ?? '' === 'g' ? 'selected' : '').'>Gramo (g)</option>
+          <option value="lb" '.($item['unidad'] ?? '' === 'lb' ? 'selected' : '').'>Libra (lb)</option>
+          <option value="L" '.($item['unidad'] ?? '' === 'L' ? 'selected' : '').'>Litro (L)</option>
+          <option value="mL" '.($item['unidad'] ?? '' === 'mL' ? 'selected' : '').'>Mililitro (mL)</option>
+          <option value="m" '.($item['unidad'] ?? '' === 'm' ? 'selected' : '').'>Metro (m)</option>
+          <option value="cm" '.($item['unidad'] ?? '' === 'cm' ? 'selected' : '').'>Centímetro (cm)</option>
+          <option value="mm" '.($item['unidad'] ?? '' === 'mm' ? 'selected' : '').'>Milímetro (mm)</option>
+          <option value="Caja" '.($item['unidad'] ?? '' === 'Caja' ? 'selected' : '').'>Caja</option>
+          <option value="Paquete" '.($item['unidad'] ?? '' === 'Paquete' ? 'selected' : '').'>Paquete</option>
+          <option value="Rollo" '.($item['unidad'] ?? '' === 'Rollo' ? 'selected' : '').'>Rollo</option>
+          <option value="Unidad" '.($item['unidad'] ?? '' === 'Unidad' ? 'selected' : '').'>Unidad</option>
+        </select>
         '.fieldError($errors, 'unidad').'
       </div>
 
@@ -71,6 +86,10 @@ $content = '
       <div class="field">
         <label>Equipo</label>
         <input name="equipo" value="'.e($item['equipo'] ?? '').'" placeholder="Bomba / Compresor / …" />
+      </div>
+      <div class="field">
+        <label>Tipo de Maquinaria</label>
+        <input name="tipo_maquinaria" value="'.e($item['tipo_maquinaria'] ?? '').'" placeholder="Maquinaria para la que se usará (Ej: Compresor, Bomba hidráulica)…" />
       </div>
 
       <div class="field">
@@ -104,10 +123,6 @@ $content .= '
         '.fieldError($errors, 'posicion').'
       </div>
 
-      <div class="field">
-        <label>Precio pagado</label>
-        <input type="number" step="0.01" min="0" name="precio_pagado" value="'.e((string)($item['precio_pagado'] ?? '')).'" />
-      </div>
 
       '.(!$isEdit ? '<div class="field" style="grid-column:1/-1;border-top:2px solid rgba(59, 130, 246, .15);padding-top:16px;margin-top:8px">
         <div class="muted" style="font-size:11px; letter-spacing:.12em; text-transform:uppercase">Información de Entrada</div>

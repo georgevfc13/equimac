@@ -34,6 +34,8 @@ final class SalidaController
             'quien_recibio' => trim((string)($_POST['quien_recibio'] ?? '')),
             'quien_entrego' => trim((string)($_POST['quien_entrego'] ?? '')),
             'cantidad_usada' => (string)($_POST['cantidad_usada'] ?? ''),
+            'fecha_salida' => trim((string)($_POST['fecha_salida'] ?? '')),
+            'hora_salida' => trim((string)($_POST['hora_salida'] ?? '')),
         ];
 
         $errors = $this->validate($old);
@@ -88,7 +90,9 @@ final class SalidaController
                 $codigo,
                 $old['quien_recibio'],
                 $old['quien_entrego'],
-                $cantidad
+                $cantidad,
+                $old['fecha_salida'] ?: null,
+                $old['hora_salida'] ?: null
             );
             $pdo->commit();
         } catch (\Throwable $e) {
@@ -110,6 +114,12 @@ final class SalidaController
         }
         if ($old['quien_entrego'] === '') {
             $errors['quien_entrego'] = 'Indica quién entregó el material.';
+        }
+        if ($old['fecha_salida'] === '') {
+            $errors['fecha_salida'] = 'Indica la fecha de salida.';
+        }
+        if ($old['hora_salida'] === '') {
+            $errors['hora_salida'] = 'Indica la hora de salida.';
         }
         $n = (int)$old['cantidad_usada'];
         if ($old['cantidad_usada'] === '' || !is_numeric($old['cantidad_usada'])) {

@@ -15,10 +15,10 @@ final class Salidas
         $this->db = Database::pdo();
     }
 
-    public function create(int $inventarioId, string $codigo, string $quienRecibio, string $quienEntrego, int $cantidadUsada): void
+    public function create(int $inventarioId, string $codigo, string $quienRecibio, string $quienEntrego, int $cantidadUsada, ?string $fechaSalida = null, ?string $horaSalida = null): void
     {
-        $sql = 'INSERT INTO salidas (inventario_id, codigo, quien_recibio, quien_entrego, cantidad_usada)
-                VALUES (:inv_id, :codigo, :quien_recibio, :quien_entrego, :cantidad_usada)';
+        $sql = 'INSERT INTO salidas (inventario_id, codigo, quien_recibio, quien_entrego, cantidad_usada, fecha_salida, hora_salida)
+                VALUES (:inv_id, :codigo, :quien_recibio, :quien_entrego, :cantidad_usada, :fecha_salida, :hora_salida)';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':inv_id' => $inventarioId,
@@ -26,6 +26,8 @@ final class Salidas
             ':quien_recibio' => $quienRecibio,
             ':quien_entrego' => $quienEntrego,
             ':cantidad_usada' => $cantidadUsada,
+            ':fecha_salida' => $fechaSalida ?: null,
+            ':hora_salida' => $horaSalida ?: null,
         ]);
     }
 

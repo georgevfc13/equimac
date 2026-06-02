@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS salidas (
   quien_recibio VARCHAR(160) NOT NULL,
   quien_entrego VARCHAR(160) NOT NULL,
   cantidad_usada INT NOT NULL,
+  fecha_salida DATE DEFAULT NULL,
+  hora_salida TIME DEFAULT NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_inventario (inventario_id),
   INDEX idx_codigo (codigo),

@@ -34,7 +34,8 @@ final class ApiController
     public function buscarInventario(): void
     {
         $q = trim((string)($_GET['q'] ?? ''));
-        $items = (new Inventario())->all($q);
+        $type = trim((string)($_GET['type'] ?? 'all'));
+        $items = (new Inventario())->search($q, $type);
         json(['ok' => true, 'items' => $items]);
     }
 

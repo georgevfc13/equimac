@@ -27,10 +27,23 @@ $content = '
 
 <div class="card pad">
   <div class="toolbar">
-    <div class="search" title="Busca por nombre, marca o equipo">
-      <span aria-hidden="true">⌕</span>
-      <input id="js-search" autocomplete="off" placeholder="Buscar por nombre…" value="'.e($q ?? '').'" />
-      <span class="muted" style="font-size:12px">Resultados: <strong id="js-counter">'.count($items).'</strong></span>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+      <div style="display:flex; gap:8px; align-items:center">
+        <label style="font-size:13px; font-weight:600; margin:0">Filtrar por:</label>
+        <select id="js-filter-type" style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; font-size:13px">
+          <option value="all">Todos los campos</option>
+          <option value="codigo">Código</option>
+          <option value="nombre">Nombre</option>
+          <option value="marca">Marca</option>
+          <option value="equipo">Equipo</option>
+          <option value="tipo_maquinaria">Maquinaria</option>
+        </select>
+      </div>
+      <div class="search" style="flex:1; min-width:200px">
+        <span aria-hidden="true">⌕</span>
+        <input id="js-search" autocomplete="off" placeholder="Escribe para filtrar…" value="'.e($q ?? '').'" />
+        <span class="muted" style="font-size:12px">Resultados: <strong id="js-counter">'.count($items).'</strong></span>
+      </div>
     </div>
     <div class="row">
       <a class="btn" href="'.e(url('inventario/exportar')).'">Exportar a Excel</a>

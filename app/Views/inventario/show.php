@@ -28,10 +28,6 @@ $content = '
       <label>Nombre</label>
       <input readonly value="'.e($item['nombre'] ?? '').'" />
     </div>
-    <div class="field">
-      <label>Unidad</label>
-      <input readonly value="'.e($item['unidad']).'" />
-    </div>
     <div class="field" style="grid-column:1/-1">
       <label>Descripción</label>
       <textarea readonly>'.e($item['descripcion']).'</textarea>
@@ -40,6 +36,10 @@ $content = '
     <div class="field">
       <label>Marca</label>
       <input readonly value="'.e($item['marca'] ?? '').'" placeholder="—" />
+    </div>
+    <div class="field">
+      <label>Unidad</label>
+      <input readonly value="'.e($item['unidad']).'" />
     </div>
     <div class="field">
       <label>Equipo</label>

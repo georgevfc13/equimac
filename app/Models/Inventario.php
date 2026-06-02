@@ -39,10 +39,45 @@ final class Inventario
         }
 
         $sql = "SELECT * FROM inventario
-                WHERE nombre LIKE :q OR marca LIKE :q OR equipo LIKE :q
+                WHERE nombre LIKE :q OR marca LIKE :q OR equipo LIKE :q OR tipo_maquinaria LIKE :q
                 ORDER BY estante, entrepaño, posicion, nombre, codigo";
         $stmt = $this->db->prepare($sql);
         $like = '%' . $q . '%';
+        $stmt->execute([':q' => $like]);
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public function search(string $q = '', string $type = 'all'): array
+    {
+        if ($q === '') {
+            $stmt = $this->db->query("SELECT * FROM inventario ORDER BY estante, entrepaño, posicion, nombre, codigo");
+            return $stmt->fetchAll() ?: [];
+        }
+
+        $like = '%' . $q . '%';
+        
+        switch ($type) {
+            case 'codigo':
+                $sql = "SELECT * FROM inventario WHERE codigo LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
+                break;
+            case 'nombre':
+                $sql = "SELECT * FROM inventario WHERE nombre LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
+                break;
+            case 'marca':
+                $sql = "SELECT * FROM inventario WHERE marca LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
+                break;
+            case 'equipo':
+                $sql = "SELECT * FROM inventario WHERE equipo LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
+                break;
+            case 'tipo_maquinaria':
+                $sql = "SELECT * FROM inventario WHERE tipo_maquinaria LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
+                break;
+            default:
+                // 'all' o cualquier otro valor
+                $sql = "SELECT * FROM inventario WHERE nombre LIKE :q OR marca LIKE :q OR equipo LIKE :q OR tipo_maquinaria LIKE :q OR codigo LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
+        }
+
+        $stmt = $this->db->prepare($sql);
         $stmt->execute([':q' => $like]);
         return $stmt->fetchAll() ?: [];
     }
@@ -77,6 +112,23 @@ final class Inventario
             ':qty' => $cantidad,
             ':id' => $id,
             ':min_stock' => $cantidad,
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /** Incrementa cantidad de un producto. */
+    public function incrementCantidad(int $id, int $cantidad): bool
+    {
+        if ($cantidad <= 0) {
+            return false;
+        }
+        $sql = 'UPDATE inventario
+                SET cantidad = cantidad + :qty, fecha_actualizacion = NOW()
+                WHERE id = :id';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':qty' => $cantidad,
+            ':id' => $id,
         ]);
         return $stmt->rowCount() > 0;
     }

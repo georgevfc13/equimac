@@ -171,6 +171,80 @@ final class InventarioController
         redirect('/inventario');
     }
 
+    public function reabastecer(): Response
+    {
+        $items = $this->inv->all('');
+        return Response::html(view('inventario/reabastecer', [
+            'title' => 'Reabastecer Producto',
+            'active' => 'inventario',
+            'items' => $items,
+            'errors' => [],
+            'selectedProductId' => null,
+        ]));
+    }
+
+    public function storeReabastecimiento(): void
+    {
+        $inventarioId = (int)($_POST['inventario_id'] ?? 0);
+        $cantidad = (int)($_POST['cantidad'] ?? 0);
+        $deQuienLlego = trim((string)($_POST['de_quien_llego'] ?? ''));
+        $quienRecibio = trim((string)($_POST['quien_recibio'] ?? ''));
+        $observaciones = trim((string)($_POST['observaciones'] ?? ''));
+
+        $errors = [];
+        if ($inventarioId <= 0) {
+            $errors['inventario_id'] = 'Selecciona un producto válido.';
+        }
+        if ($cantidad <= 0) {
+            $errors['cantidad'] = 'La cantidad debe ser mayor a cero.';
+        }
+        if ($deQuienLlego === '') {
+            $errors['de_quien_llego'] = 'Indica de quién llegó el producto.';
+        }
+        if ($quienRecibio === '') {
+            $errors['quien_recibio'] = 'Indica quién recibió el producto.';
+        }
+
+        if ($errors) {
+            $items = $this->inv->all('');
+            Response::html(view('inventario/reabastecer', [
+                'title' => 'Reabastecer Producto',
+                'active' => 'inventario',
+                'items' => $items,
+                'errors' => $errors,
+                'selectedProductId' => $inventarioId,
+            ]), 422)->send();
+            return;
+        }
+
+        $producto = $this->inv->find($inventarioId);
+        if (!$producto) {
+            $errors['inventario_id'] = 'Producto no encontrado.';
+            $items = $this->inv->all('');
+            Response::html(view('inventario/reabastecer', [
+                'title' => 'Reabastecer Producto',
+                'active' => 'inventario',
+                'items' => $items,
+                'errors' => $errors,
+                'selectedProductId' => $inventarioId,
+            ]), 422)->send();
+            return;
+        }
+
+        // Incrementar cantidad y registrar entrada
+        $this->inv->incrementCantidad($inventarioId, $cantidad);
+        $this->entradas->create([
+            'inventario_id' => $inventarioId,
+            'codigo' => $producto['codigo'],
+            'cantidad' => $cantidad,
+            'quien_entrego' => $deQuienLlego,
+            'quien_recibio' => $quienRecibio,
+            'observaciones' => $observaciones ?: 'Reabastecer producto',
+        ]);
+
+        redirect('/inventario/' . $inventarioId);
+    }
+
     private function validate(array $data, ?int $id): array
     {
         $errors = [];

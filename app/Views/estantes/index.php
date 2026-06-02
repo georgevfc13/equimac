@@ -142,7 +142,7 @@ foreach (($estantes ?? []) as $e) {
                   <a class="btn" style="padding:8px 10px; border-radius:14px; width:100%; justify-content:center"
                      href="'.e(url('inventario/'.(int)$prod['id'])).'"
                      title="'.e($prod['descripcion']).'">
-                    <span class="mono">'.e($prod['codigo']).'</span>
+                    <span class="mono">'.e($prod['nombre'] ?? $prod['codigo']).'</span>
                   </a>
                 </td>';
             } else {

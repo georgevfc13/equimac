@@ -103,6 +103,7 @@
 
   // Instant search (Inventario)
   const search = $('#js-search');
+  const filterType = $('#js-filter-type');
   let searchAbort = null;
   if (search) {
     const tbody = $('#js-table-body');
@@ -165,10 +166,11 @@
 
     const doSearch = async () => {
       const q = search.value.trim();
+      const type = filterType ? filterType.value : 'all';
       if (searchAbort) searchAbort.abort();
       searchAbort = new AbortController();
       try {
-        const r = await fetch(u(`api/inventario/buscar?q=${encodeURIComponent(q)}`), { signal: searchAbort.signal });
+        const r = await fetch(u(`api/inventario/buscar?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`), { signal: searchAbort.signal });
         const data = await r.json();
         if (!data.ok) throw new Error(data.message || 'Error');
         renderRows(data.items || []);
@@ -183,6 +185,13 @@
       clearTimeout(t);
       t = setTimeout(doSearch, 180);
     });
+    
+    if (filterType) {
+      filterType.addEventListener('change', () => {
+        clearTimeout(t);
+        t = setTimeout(doSearch, 180);
+      });
+    }
   }
 
   // Quick delete
