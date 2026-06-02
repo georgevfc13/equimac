@@ -20,7 +20,7 @@ $content = '
     <p class="page-sub">Búsqueda instantánea, acciones rápidas y UI local con animaciones.</p>
   </div>
   <div class="row">
-    <a class="btn primary" href="'.e(url('inventario/nuevo')).'">+ Crear producto</a>
+    <a class="btn primary" href="'.e(url('inventario/entrada')).'">+ Registrar Entrada</a>
   </div>
 </div>
 '.$statsHtml.'

@@ -35,6 +35,7 @@ try {
     $router->get('/', [App\Controllers\HomeController::class, 'redirectToInventario']);
     $router->get('/inventario', [App\Controllers\InventarioController::class, 'index']);
     $router->get('/inventario/exportar', [App\Controllers\InventarioController::class, 'exportExcel']);
+    $router->get('/inventario/entrada', [App\Controllers\InventarioController::class, 'tipoEntrada']);
     $router->get('/inventario/nuevo', [App\Controllers\InventarioController::class, 'create']);
     $router->get('/inventario/reabastecer', [App\Controllers\InventarioController::class, 'reabastecer']);
     $router->get('/inventario/{id}', [App\Controllers\InventarioController::class, 'show']);

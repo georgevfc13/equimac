@@ -19,7 +19,7 @@ $content = '
     <p class="page-sub">Entrada rápida, validación clara y UX local.</p>
   </div>
   <div class="row">
-    <a class="btn" href="'.e(url('inventario')).'">Volver</a>
+    <a class="btn" href="'.e(url($isEdit ? 'inventario' : 'inventario/entrada')).'">Volver</a>
   </div>
 </div>
 

@@ -83,6 +83,14 @@ final class InventarioController
         ]));
     }
 
+    public function tipoEntrada(): Response
+    {
+        return Response::html(view('inventario/entrada-tipo', [
+            'title' => 'Registrar Entrada',
+            'active' => 'inventario',
+        ]));
+    }
+
     public function edit(string $id): Response
     {
         $pid = (int)$id;
