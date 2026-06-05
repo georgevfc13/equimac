@@ -19,9 +19,9 @@ final class Entradas
     public function create(array $data): int
     {
         $sql = "INSERT INTO entradas
-                (inventario_id, codigo, cantidad, quien_entrego, quien_recibio, observaciones)
+                (inventario_id, codigo, cantidad, quien_entrego, quien_recibio, observaciones, fecha_entrada, hora_entrada)
                 VALUES
-                (:inventario_id, :codigo, :cantidad, :quien_entrego, :quien_recibio, :observaciones)";
+                (:inventario_id, :codigo, :cantidad, :quien_entrego, :quien_recibio, :observaciones, :fecha_entrada, :hora_entrada)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':inventario_id' => (int)$data['inventario_id'],
@@ -30,6 +30,8 @@ final class Entradas
             ':quien_entrego' => $data['quien_entrego'] ?: null,
             ':quien_recibio' => $data['quien_recibio'] ?: null,
             ':observaciones' => $data['observaciones'] ?: null,
+            ':fecha_entrada' => $data['fecha_entrada'] ?: null,
+            ':hora_entrada' => $data['hora_entrada'] ?: null,
         ]);
         return (int)$this->db->lastInsertId();
     }

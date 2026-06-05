@@ -74,6 +74,7 @@ $content .= ($entradas ? '
           <th>Cantidad</th>
           <th>Quién recibió</th>
           <th>Quién entregó</th>
+          <th>Observaciones</th>
         </tr>
       </thead>
       <tbody>' : '').'';
@@ -90,6 +91,7 @@ foreach ($salidas as $s) {
           <td><strong>'.(int)$s['cantidad_usada'].' '.e($s['unidad'] ?? '').'</strong></td>
           <td>'.e($s['quien_recibio'] ?? '—').'</td>
           <td>'.e($s['quien_entrego'] ?? '—').'</td>
+          <td style="font-size:12px; color:#666">'.e($s['observaciones'] ?? '—').'</td>
         </tr>';
 }
 

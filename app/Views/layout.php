@@ -39,7 +39,8 @@ try {
             <a class="chip <?= ($active ?? '') === 'inventario' ? 'is-active' : '' ?>" href="<?= e(url('inventario')) ?>">Inventario</a>
             <a class="chip <?= ($active ?? '') === 'estantes' ? 'is-active' : '' ?>" href="<?= e(url('estantes')) ?>">Estantes</a>
             <a class="chip <?= ($active ?? '') === 'salida' ? 'is-active' : '' ?>" href="<?= e(url('salida')) ?>">Salida</a>
-            <a class="chip" href="<?= e(url('inventario/nuevo')) ?>">+ Nuevo</a>
+            <a class="chip <?= ($active ?? '') === 'kardex' ? 'is-active' : '' ?>" href="<?= e(url('kardex')) ?>" title="Registro de todas las entradas y salidas">📋 Kardex</a>
+            <a class="chip" href="<?= e(url('inventario/entrada')) ?>">+ Entrada</a>
 
             <div class="notif-wrap" id="js-notif-wrap" style="position:relative">
               <button type="button" class="notif-bell" id="js-notif-bell" aria-haspopup="dialog" aria-expanded="false" aria-controls="js-notif-panel" title="Notificaciones">

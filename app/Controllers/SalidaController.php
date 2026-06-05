@@ -36,6 +36,7 @@ final class SalidaController
             'cantidad_usada' => (string)($_POST['cantidad_usada'] ?? ''),
             'fecha_salida' => trim((string)($_POST['fecha_salida'] ?? '')),
             'hora_salida' => trim((string)($_POST['hora_salida'] ?? '')),
+            'observaciones' => trim((string)($_POST['observaciones'] ?? '')),
         ];
 
         $errors = $this->validate($old);
@@ -92,7 +93,8 @@ final class SalidaController
                 $old['quien_entrego'],
                 $cantidad,
                 $old['fecha_salida'] ?: null,
-                $old['hora_salida'] ?: null
+                $old['hora_salida'] ?: null,
+                $old['observaciones'] ?: null
             );
             $pdo->commit();
         } catch (\Throwable $e) {

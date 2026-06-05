@@ -161,7 +161,9 @@ final class InventarioController
                     'cantidad' => $data['cantidad'],
                     'quien_entrego' => $data['de_quien_llego'],
                     'quien_recibio' => $data['quien_recibio'],
-                    'observaciones' => 'Entrada inicial al crear producto',
+                    'observaciones' => trim((string)($_POST['observaciones_entrada'] ?? '')) ?: 'Entrada inicial al crear producto',
+                    'fecha_entrada' => trim((string)($_POST['fecha_entrada'] ?? '')) ?: null,
+                    'hora_entrada' => trim((string)($_POST['hora_entrada'] ?? '')) ?: null,
                 ]);
             }
             
@@ -199,6 +201,8 @@ final class InventarioController
         $deQuienLlego = trim((string)($_POST['de_quien_llego'] ?? ''));
         $quienRecibio = trim((string)($_POST['quien_recibio'] ?? ''));
         $observaciones = trim((string)($_POST['observaciones'] ?? ''));
+        $fechaEntrada = trim((string)($_POST['fecha_entrada'] ?? ''));
+        $horaEntrada = trim((string)($_POST['hora_entrada'] ?? ''));
 
         $old = [
             'inventario_id' => $inventarioId,
@@ -206,6 +210,8 @@ final class InventarioController
             'de_quien_llego' => $deQuienLlego,
             'quien_recibio' => $quienRecibio,
             'observaciones' => $observaciones,
+            'fecha_entrada' => $fechaEntrada,
+            'hora_entrada' => $horaEntrada,
         ];
 
         $errors = [];
@@ -258,6 +264,8 @@ final class InventarioController
             'quien_entrego' => $deQuienLlego,
             'quien_recibio' => $quienRecibio,
             'observaciones' => $observaciones !== '' ? $observaciones : 'Reabastecimiento',
+            'fecha_entrada' => $fechaEntrada ?: null,
+            'hora_entrada' => $horaEntrada ?: null,
         ]);
 
         redirect('/inventario/' . $inventarioId . '?reabastecido=1');

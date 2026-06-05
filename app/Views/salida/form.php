@@ -53,6 +53,11 @@ $content = '
         <input name="quien_entrego" value="'.e((string)($o['quien_entrego'] ?? '')).'" placeholder="Nombre de quien entrega desde bodega" />
         '.salidaFieldError($errors ?? [], 'quien_entrego').'
       </div>
+
+      <div class="field" style="grid-column:1/-1">
+        <label>Observaciones</label>
+        <textarea name="observaciones" placeholder="Notas adicionales sobre esta salida (ej: para mantenimiento, rechazo por calidad, etc.)…" style="height:60px">'.e((string)($o['observaciones'] ?? '')).'</textarea>
+      </div>
     </div>
     <div style="height:16px"></div>
     <div class="row" style="justify-content:flex-end">

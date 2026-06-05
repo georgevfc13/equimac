@@ -19,6 +19,8 @@ $cantidadVal = (string)($old['cantidad'] ?? '1');
 $deQuienVal = (string)($old['de_quien_llego'] ?? '');
 $quienRecibioVal = (string)($old['quien_recibio'] ?? '');
 $obsVal = (string)($old['observaciones'] ?? '');
+$fechaVal = (string)($old['fecha_entrada'] ?? date('Y-m-d'));
+$horaVal = (string)($old['hora_entrada'] ?? '');
 
 $content = '
 <div class="page-head">
@@ -123,6 +125,18 @@ if (empty($items)) {
       <div class="field" style="grid-column:1/-1">
         <label>Observaciones</label>
         <textarea name="observaciones" placeholder="Notas adicionales (opcional)" style="min-height:80px">'.e($obsVal).'</textarea>
+      </div>
+
+      <div class="field">
+        <label>Fecha de entrada</label>
+        <input type="date" name="fecha_entrada" value="'.e($fechaVal).'" />
+        '.reabastecerFieldError($errors, 'fecha_entrada').'
+      </div>
+
+      <div class="field">
+        <label>Hora de entrada</label>
+        <input type="time" name="hora_entrada" value="'.e($horaVal).'" />
+        '.reabastecerFieldError($errors, 'hora_entrada').'
       </div>
     </div>
 

@@ -139,6 +139,23 @@ $content .= '
         <input name="quien_recibio" value="'.e($item['quien_recibio'] ?? '').'" placeholder="Nombre de quién recibió…" />
         '.fieldError($errors, 'quien_recibio').'
       </div>' : '').'
+
+      '.(!$isEdit ? '<div class="field">
+        <label>Fecha de entrada</label>
+        <input type="date" name="fecha_entrada" value="'.e((string)($item['fecha_entrada'] ?? date('Y-m-d'))).'" />
+        '.fieldError($errors, 'fecha_entrada').'
+      </div>' : '').'
+
+      '.(!$isEdit ? '<div class="field">
+        <label>Hora de entrada</label>
+        <input type="time" name="hora_entrada" value="'.e((string)($item['hora_entrada'] ?? '')).'" />
+        '.fieldError($errors, 'hora_entrada').'
+      </div>' : '').'
+
+      '.(!$isEdit ? '<div class="field" style="grid-column:1/-1">
+        <label>Observaciones</label>
+        <textarea name="observaciones_entrada" placeholder="Notas adicionales sobre esta entrada (ej: descuento aplicado, producto dañado, etc.)…" style="height:60px">'.e((string)($item['observaciones_entrada'] ?? '')).'</textarea>
+      </div>' : '').'
     </div>
 
     <div class="modal-foot" style="padding-left:0;padding-right:0;border-top:none;background:transparent">
