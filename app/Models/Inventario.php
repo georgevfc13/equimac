@@ -31,6 +31,16 @@ final class Inventario
         ];
     }
 
+    /** Lista ligera para selects (reabastecimiento, etc.). */
+    public function allForSelect(): array
+    {
+        $sql = "SELECT id, codigo, nombre, cantidad, unidad, stock_minimo, estante, entrepaño, posicion
+                FROM inventario
+                ORDER BY nombre ASC, codigo ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll() ?: [];
+    }
+
     public function all(string $q = ''): array
     {
         if ($q === '') {

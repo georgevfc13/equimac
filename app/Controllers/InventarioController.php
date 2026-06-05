@@ -181,13 +181,14 @@ final class InventarioController
 
     public function reabastecer(): Response
     {
-        $items = $this->inv->all('');
+        $selectedId = (int)($_GET['id'] ?? $_GET['producto'] ?? 0);
         return Response::html(view('inventario/reabastecer', [
             'title' => 'Reabastecer Producto',
             'active' => 'inventario',
-            'items' => $items,
+            'items' => $this->inv->allForSelect(),
             'errors' => [],
-            'selectedProductId' => null,
+            'selectedProductId' => $selectedId > 0 ? $selectedId : null,
+            'old' => [],
         ]));
     }
 
@@ -199,9 +200,17 @@ final class InventarioController
         $quienRecibio = trim((string)($_POST['quien_recibio'] ?? ''));
         $observaciones = trim((string)($_POST['observaciones'] ?? ''));
 
+        $old = [
+            'inventario_id' => $inventarioId,
+            'cantidad' => $cantidad,
+            'de_quien_llego' => $deQuienLlego,
+            'quien_recibio' => $quienRecibio,
+            'observaciones' => $observaciones,
+        ];
+
         $errors = [];
         if ($inventarioId <= 0) {
-            $errors['inventario_id'] = 'Selecciona un producto válido.';
+            $errors['inventario_id'] = 'Selecciona un producto del inventario.';
         }
         if ($cantidad <= 0) {
             $errors['cantidad'] = 'La cantidad debe ser mayor a cero.';
@@ -213,44 +222,45 @@ final class InventarioController
             $errors['quien_recibio'] = 'Indica quién recibió el producto.';
         }
 
-        if ($errors) {
-            $items = $this->inv->all('');
+        $renderForm = function (array $errors, ?int $selectedId) use ($old): void {
             Response::html(view('inventario/reabastecer', [
                 'title' => 'Reabastecer Producto',
                 'active' => 'inventario',
-                'items' => $items,
+                'items' => $this->inv->allForSelect(),
                 'errors' => $errors,
-                'selectedProductId' => $inventarioId,
+                'selectedProductId' => $selectedId,
+                'old' => $old,
             ]), 422)->send();
+        };
+
+        if ($errors) {
+            $renderForm($errors, $inventarioId > 0 ? $inventarioId : null);
             return;
         }
 
         $producto = $this->inv->find($inventarioId);
         if (!$producto) {
             $errors['inventario_id'] = 'Producto no encontrado.';
-            $items = $this->inv->all('');
-            Response::html(view('inventario/reabastecer', [
-                'title' => 'Reabastecer Producto',
-                'active' => 'inventario',
-                'items' => $items,
-                'errors' => $errors,
-                'selectedProductId' => $inventarioId,
-            ]), 422)->send();
+            $renderForm($errors, null);
             return;
         }
 
-        // Incrementar cantidad y registrar entrada
-        $this->inv->incrementCantidad($inventarioId, $cantidad);
+        if (!$this->inv->incrementCantidad($inventarioId, $cantidad)) {
+            $errors['cantidad'] = 'No se pudo actualizar el stock.';
+            $renderForm($errors, $inventarioId);
+            return;
+        }
+
         $this->entradas->create([
             'inventario_id' => $inventarioId,
             'codigo' => $producto['codigo'],
             'cantidad' => $cantidad,
             'quien_entrego' => $deQuienLlego,
             'quien_recibio' => $quienRecibio,
-            'observaciones' => $observaciones ?: 'Reabastecer producto',
+            'observaciones' => $observaciones !== '' ? $observaciones : 'Reabastecimiento',
         ]);
 
-        redirect('/inventario/' . $inventarioId);
+        redirect('/inventario/' . $inventarioId . '?reabastecido=1');
     }
 
     private function validate(array $data, ?int $id): array

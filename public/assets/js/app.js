@@ -462,6 +462,83 @@
     initTableSizePickers();
   }
 
+  // Reabastecimiento: filtro y vista previa del producto seleccionado
+  function initReabastecerForm() {
+    const select = document.getElementById('js-product-select');
+    const filter = document.getElementById('js-reabastecer-filter');
+    const preview = document.getElementById('js-product-preview');
+    if (!select) return;
+
+    const previewNombre = document.getElementById('js-preview-nombre');
+    const previewCodigo = document.getElementById('js-preview-codigo');
+    const previewStock = document.getElementById('js-preview-stock');
+    const previewUbic = document.getElementById('js-preview-ubic');
+    const hint = document.getElementById('js-reabastecer-hint');
+
+    const allOptions = Array.from(select.options).filter((o) => o.value !== '');
+
+    const updatePreview = () => {
+      const opt = select.options[select.selectedIndex];
+      if (!opt || !opt.value) {
+        if (preview) preview.style.display = 'none';
+        if (hint) hint.textContent = 'Elige el producto que vas a reabastecer.';
+        return;
+      }
+      if (preview) preview.style.display = '';
+      if (previewNombre) previewNombre.textContent = opt.dataset.nombre || opt.textContent;
+      if (previewCodigo) previewCodigo.textContent = opt.dataset.codigo || '';
+      if (previewStock) {
+        previewStock.textContent = `${opt.dataset.cantidad || 0} ${opt.dataset.unidad || ''} (mín. ${opt.dataset.min || 5})`;
+      }
+      if (previewUbic) previewUbic.textContent = opt.dataset.ubicacion || '';
+      if (hint) hint.textContent = '';
+    };
+
+    const applyFilter = () => {
+      const q = (filter?.value || '').trim().toLowerCase();
+      const current = select.value;
+      select.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '— Selecciona un producto —';
+      select.appendChild(placeholder);
+
+      let count = 0;
+      allOptions.forEach((opt) => {
+        const label = (opt.dataset.label || opt.textContent || '').toLowerCase();
+        if (!q || label.includes(q)) {
+          select.appendChild(opt.cloneNode(true));
+          count++;
+        }
+      });
+
+      if (current && select.querySelector(`option[value="${current}"]`)) {
+        select.value = current;
+      } else {
+        select.value = '';
+      }
+
+      if (hint && q) {
+        hint.textContent = count
+          ? `${count} producto(s) coinciden con la búsqueda.`
+          : 'Ningún producto coincide. Prueba otro nombre o código.';
+      }
+      updatePreview();
+    };
+
+    select.addEventListener('change', updatePreview);
+    if (filter) {
+      filter.addEventListener('input', applyFilter);
+    }
+    updatePreview();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReabastecerForm);
+  } else {
+    initReabastecerForm();
+  }
+
   // Stock bajo: notificación y desactivación de productos sin stock
   function initStockNotifications() {
     const dataEl = document.getElementById('js-low-stock-data');
@@ -567,9 +644,9 @@
 
           if (id && Number.isFinite(id)) {
             el.style.cursor = 'pointer';
-            el.title = 'Abrir producto';
+            el.title = 'Reabastecer producto';
             el.addEventListener('click', () => {
-              location.href = u(`inventario/${id}`);
+              location.href = u(`inventario/reabastecer?id=${id}`);
             });
           }
 

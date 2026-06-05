@@ -3,7 +3,12 @@
 /** @var array $entradas */
 /** @var array $salidas */
 
-$content = '
+$flashReab = '';
+if (isset($_GET['reabastecido']) && $_GET['reabastecido'] === '1') {
+  $flashReab = '<div class="card pad" style="margin-bottom:14px;border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.08)"><strong>Reabastecimiento registrado</strong> · El stock y el kardex de entradas se actualizaron.</div>';
+}
+
+$content = $flashReab.'
 <div class="page-head kardex-screen-only">
   <div>
     <h2 class="page-title">Detalle</h2>
@@ -11,6 +16,7 @@ $content = '
   </div>
   <div class="row">
     <a class="btn" href="'.e(url('inventario')).'">Volver</a>
+    <a class="btn good" href="'.e(url('inventario/reabastecer?id='.(int)$item['id'])).'">Reabastecer</a>
     <a class="btn primary" href="'.e(url('inventario/'.(int)$item['id'].'/editar')).'">Editar</a>
     <form method="POST" action="'.e(url('inventario/'.(int)$item['id'].'/eliminar')).'" style="display:inline" onsubmit="return confirm(\'¿Eliminar este producto?\')">
       <button class="btn danger" type="submit">Eliminar</button>
