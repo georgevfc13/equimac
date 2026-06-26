@@ -6,8 +6,11 @@ namespace App\Controllers;
 use App\Models\Estantes;
 use App\Models\Inventario;
 use App\Models\Entradas;
+use App\Models\OrdenesEntrada;
 use App\Models\Salidas;
+use App\Support\Database;
 use App\Support\ExcelExport;
+use App\Support\OrdenHelper;
 use App\Support\Response;
 
 final class InventarioController
@@ -152,9 +155,15 @@ final class InventarioController
             redirect('/inventario/' . $id);
         } else {
             $newId = $this->inv->create($data);
-            
-            // Registrar la entrada inicial del producto
+
             if ($data['cantidad'] > 0) {
+                $ordenEntradaId = $this->createOrdenEntrada([
+                    'quien_entrego' => $data['de_quien_llego'],
+                    'quien_recibio' => $data['quien_recibio'],
+                    'observaciones' => trim((string)($_POST['observaciones_entrada'] ?? '')) ?: 'Entrada inicial al crear producto',
+                    'fecha_entrada' => trim((string)($_POST['fecha_entrada'] ?? '')) ?: null,
+                    'hora_entrada' => trim((string)($_POST['hora_entrada'] ?? '')) ?: null,
+                ]);
                 $this->entradas->create([
                     'inventario_id' => $newId,
                     'codigo' => $data['codigo'],
@@ -164,9 +173,10 @@ final class InventarioController
                     'observaciones' => trim((string)($_POST['observaciones_entrada'] ?? '')) ?: 'Entrada inicial al crear producto',
                     'fecha_entrada' => trim((string)($_POST['fecha_entrada'] ?? '')) ?: null,
                     'hora_entrada' => trim((string)($_POST['hora_entrada'] ?? '')) ?: null,
+                    'orden_entrada_id' => $ordenEntradaId,
                 ]);
             }
-            
+
             redirect('/inventario/' . $newId);
         }
     }
@@ -257,6 +267,14 @@ final class InventarioController
             return;
         }
 
+        $ordenEntradaId = $this->createOrdenEntrada([
+            'quien_entrego' => $deQuienLlego,
+            'quien_recibio' => $quienRecibio,
+            'observaciones' => $observaciones !== '' ? $observaciones : 'Reabastecimiento',
+            'fecha_entrada' => $fechaEntrada ?: null,
+            'hora_entrada' => $horaEntrada ?: null,
+        ]);
+
         $this->entradas->create([
             'inventario_id' => $inventarioId,
             'codigo' => $producto['codigo'],
@@ -266,9 +284,164 @@ final class InventarioController
             'observaciones' => $observaciones !== '' ? $observaciones : 'Reabastecimiento',
             'fecha_entrada' => $fechaEntrada ?: null,
             'hora_entrada' => $horaEntrada ?: null,
+            'orden_entrada_id' => $ordenEntradaId,
         ]);
 
         redirect('/inventario/' . $inventarioId . '?reabastecido=1');
+    }
+
+    public function entradaLote(): Response
+    {
+        return Response::html(view('inventario/entrada-lote', [
+            'title' => 'Entrada múltiple',
+            'active' => 'inventario',
+            'items' => $this->inv->allForSelect(),
+            'errors' => [],
+            'old' => $this->defaultEntradaLoteOld(),
+        ]));
+    }
+
+    public function storeEntradaLote(): void
+    {
+        $old = [
+            'de_quien_llego' => trim((string)($_POST['de_quien_llego'] ?? '')),
+            'quien_recibio' => trim((string)($_POST['quien_recibio'] ?? '')),
+            'observaciones' => trim((string)($_POST['observaciones'] ?? '')),
+            'fecha_entrada' => trim((string)($_POST['fecha_entrada'] ?? '')),
+            'hora_entrada' => trim((string)($_POST['hora_entrada'] ?? '')),
+        ];
+        $lines = $this->parseEntradaLinesFromPost();
+        $old['lines'] = $lines;
+
+        $errors = [];
+        if ($old['de_quien_llego'] === '') {
+            $errors['de_quien_llego'] = 'Indica de quién llegó el material.';
+        }
+        if ($old['quien_recibio'] === '') {
+            $errors['quien_recibio'] = 'Indica quién recibió el material.';
+        }
+        if (!$lines) {
+            $errors['lines'] = 'Agrega al menos un producto.';
+        }
+
+        foreach ($lines as $i => $line) {
+            $producto = $this->inv->find($line['inventario_id']);
+            if (!$producto) {
+                $errors["line_{$i}"] = 'Producto no válido en la línea ' . ($i + 1) . '.';
+            } elseif ($line['cantidad'] <= 0) {
+                $errors["line_{$i}"] = 'Cantidad inválida en la línea ' . ($i + 1) . '.';
+            }
+        }
+
+        if ($errors) {
+            Response::html(view('inventario/entrada-lote', [
+                'title' => 'Entrada múltiple',
+                'active' => 'inventario',
+                'items' => $this->inv->allForSelect(),
+                'errors' => $errors,
+                'old' => $old,
+            ]), 422)->send();
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+        $ordenEntradaId = null;
+        try {
+            $ordenEntradaId = $this->createOrdenEntrada([
+                'quien_entrego' => $old['de_quien_llego'],
+                'quien_recibio' => $old['quien_recibio'],
+                'observaciones' => $old['observaciones'] ?: 'Entrada múltiple',
+                'fecha_entrada' => $old['fecha_entrada'] ?: null,
+                'hora_entrada' => $old['hora_entrada'] ?: null,
+            ]);
+
+            foreach ($lines as $line) {
+                $producto = $this->inv->find($line['inventario_id']);
+                if (!$producto || !$this->inv->incrementCantidad($line['inventario_id'], $line['cantidad'])) {
+                    throw new \RuntimeException('No se pudo actualizar stock.');
+                }
+                $this->entradas->create([
+                    'inventario_id' => $line['inventario_id'],
+                    'codigo' => $producto['codigo'],
+                    'cantidad' => $line['cantidad'],
+                    'quien_entrego' => $old['de_quien_llego'],
+                    'quien_recibio' => $old['quien_recibio'],
+                    'observaciones' => $old['observaciones'] ?: 'Entrada múltiple',
+                    'fecha_entrada' => $old['fecha_entrada'] ?: null,
+                    'hora_entrada' => $old['hora_entrada'] ?: null,
+                    'orden_entrada_id' => $ordenEntradaId,
+                ]);
+            }
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            $errors['general'] = $e->getMessage();
+            Response::html(view('inventario/entrada-lote', [
+                'title' => 'Entrada múltiple',
+                'active' => 'inventario',
+                'items' => $this->inv->allForSelect(),
+                'errors' => $errors,
+                'old' => $old,
+            ]), 422)->send();
+        }
+
+        $orden = null;
+        if ($ordenEntradaId && OrdenHelper::schemaReady()) {
+            $row = (new OrdenesEntrada())->find($ordenEntradaId);
+            if ($row) {
+                $orden = OrdenHelper::labelEntrada((int)$row['numero']);
+            }
+        }
+        $params = ['entrada_ok' => '1'];
+        if ($orden) {
+            $params['orden'] = $orden;
+        }
+        redirect('/inventario/entrada-lote?' . http_build_query($params));
+    }
+
+    /** @return array<string, mixed> */
+    private function defaultEntradaLoteOld(): array
+    {
+        return [
+            'de_quien_llego' => '',
+            'quien_recibio' => '',
+            'observaciones' => '',
+            'fecha_entrada' => date('Y-m-d'),
+            'hora_entrada' => date('H:i'),
+            'lines' => [['inventario_id' => '', 'cantidad' => '1']],
+        ];
+    }
+
+    /** @return list<array{inventario_id:int,cantidad:int}> */
+    private function parseEntradaLinesFromPost(): array
+    {
+        $ids = $_POST['line_inventario_id'] ?? [];
+        $cantidades = $_POST['line_cantidad'] ?? [];
+        if (!is_array($ids)) {
+            return [];
+        }
+        $lines = [];
+        foreach ($ids as $i => $id) {
+            $id = (int)$id;
+            if ($id <= 0) {
+                continue;
+            }
+            $lines[] = [
+                'inventario_id' => $id,
+                'cantidad' => (int)($cantidades[$i] ?? 0),
+            ];
+        }
+        return $lines;
+    }
+
+    /** @param array{quien_entrego:string,quien_recibio:string,observaciones?:string,fecha_entrada?:?string,hora_entrada?:?string} $data */
+    private function createOrdenEntrada(array $data): ?int
+    {
+        if (!OrdenHelper::schemaReady()) {
+            return null;
+        }
+        $orden = (new OrdenesEntrada())->create($data);
+        return $orden['id'];
     }
 
     private function validate(array $data, ?int $id): array

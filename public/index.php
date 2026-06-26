@@ -15,8 +15,9 @@ require_once __DIR__ . '/../app/Support/ExcelExport.php';
 
 require_once __DIR__ . '/../app/Models/Estantes.php';
 require_once __DIR__ . '/../app/Models/Inventario.php';
-require_once __DIR__ . '/../app/Models/Entradas.php';
-require_once __DIR__ . '/../app/Models/Salidas.php';
+require_once __DIR__ . '/../app/Support/OrdenHelper.php';
+require_once __DIR__ . '/../app/Models/OrdenesEntrada.php';
+require_once __DIR__ . '/../app/Models/OrdenesSalida.php';
 
 require_once __DIR__ . '/../app/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Controllers/InventarioController.php';
@@ -38,12 +39,14 @@ try {
     $router->get('/inventario/entrada', [App\Controllers\InventarioController::class, 'tipoEntrada']);
     $router->get('/inventario/nuevo', [App\Controllers\InventarioController::class, 'create']);
     $router->get('/inventario/reabastecer', [App\Controllers\InventarioController::class, 'reabastecer']);
+    $router->get('/inventario/entrada-lote', [App\Controllers\InventarioController::class, 'entradaLote']);
     $router->get('/inventario/{id}', [App\Controllers\InventarioController::class, 'show']);
     $router->get('/inventario/{id}/editar', [App\Controllers\InventarioController::class, 'edit']);
 
     // Actions (POST)
     $router->post('/inventario/guardar', [App\Controllers\InventarioController::class, 'storeOrUpdate']);
     $router->post('/inventario/reabastecer', [App\Controllers\InventarioController::class, 'storeReabastecimiento']);
+    $router->post('/inventario/entrada-lote', [App\Controllers\InventarioController::class, 'storeEntradaLote']);
     $router->post('/inventario/{id}/eliminar', [App\Controllers\InventarioController::class, 'destroy']);
 
     $router->get('/estantes', [App\Controllers\EstantesController::class, 'index']);

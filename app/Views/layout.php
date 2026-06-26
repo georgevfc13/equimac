@@ -24,6 +24,25 @@ try {
   <link rel="stylesheet" href="<?= e(url('assets/css/app.css')) ?>" />
 </head>
 <body>
+  <div id="js-page-loader" class="page-loader" aria-live="polite" aria-busy="true">
+    <div class="page-loader-inner">
+      <img src="<?= e(url('assets/icons/logo.png')) ?>" alt="" width="56" height="56" class="page-loader-logo" />
+      <div class="page-loader-bar" aria-hidden="true"><span></span></div>
+      <p class="page-loader-text">Cargando EQUIMAC…</p>
+    </div>
+  </div>
+
+  <div id="js-stock-banner" class="stock-alert-banner" hidden>
+    <div class="stock-alert-banner-inner container">
+      <span class="stock-alert-icon" aria-hidden="true">⚠</span>
+      <div class="stock-alert-copy">
+        <strong id="js-stock-banner-title">Alerta de stock bajo</strong>
+        <span id="js-stock-banner-msg">Hay productos que necesitan reabastecimiento.</span>
+      </div>
+      <button type="button" class="btn stock-alert-btn" id="js-stock-banner-open">Ver alertas</button>
+    </div>
+  </div>
+
   <div class="app-shell">
     <header class="topbar">
       <div class="container">

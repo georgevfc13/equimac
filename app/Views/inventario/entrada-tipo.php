@@ -15,7 +15,7 @@ $content = '
 <div style="height:32px"></div>
 
 <div style="display:flex; justify-content:center; align-items:center; min-height:400px; padding:40px 20px">
-  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:32px; max-width:700px; width:100%">
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:32px; max-width:960px; width:100%">
     
     <!-- Opción 1: Nuevo Producto -->
     <a class="entrada-card" href="'.e(url('inventario/nuevo')).'">
@@ -34,6 +34,16 @@ $content = '
         <h3 class="entrada-title">Reabastecer Existente</h3>
         <p class="entrada-desc">Aumenta el stock de un producto que ya existe en tu inventario</p>
         <span class="entrada-badge">Incrementar Stock</span>
+      </div>
+    </a>
+
+    <!-- Opción 3: Entrada múltiple -->
+    <a class="entrada-card" href="'.e(url('inventario/entrada-lote')).'">
+      <div class="entrada-card-inner">
+        <span class="entrada-icon">📋</span>
+        <h3 class="entrada-title">Entrada Múltiple</h3>
+        <p class="entrada-desc">Registra varios productos en una sola orden de entrada</p>
+        <span class="entrada-badge">Orden de entrada</span>
       </div>
     </a>
 

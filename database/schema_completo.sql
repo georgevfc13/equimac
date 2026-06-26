@@ -93,3 +93,25 @@ CREATE TABLE IF NOT EXISTS salidas (
   INDEX idx_codigo (codigo),
   INDEX idx_fecha (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS ordenes_entrada (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  numero INT NOT NULL UNIQUE,
+  quien_entrego VARCHAR(160) NOT NULL DEFAULT '',
+  quien_recibio VARCHAR(160) NOT NULL DEFAULT '',
+  observaciones TEXT DEFAULT NULL,
+  fecha_entrada DATE DEFAULT NULL,
+  hora_entrada TIME DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS ordenes_salida (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  numero INT NOT NULL UNIQUE,
+  quien_recibio VARCHAR(160) NOT NULL DEFAULT '',
+  quien_entrego VARCHAR(160) NOT NULL DEFAULT '',
+  observaciones TEXT DEFAULT NULL,
+  fecha_salida DATE DEFAULT NULL,
+  hora_salida TIME DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -3,6 +3,8 @@
 /** @var array $entradas */
 /** @var array $salidas */
 
+use App\Support\OrdenHelper;
+
 $flashReab = '';
 if (isset($_GET['reabastecido']) && $_GET['reabastecido'] === '1') {
   $flashReab = '<div class="card pad" style="margin-bottom:14px;border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.08)"><strong>Reabastecimiento registrado</strong> · El stock y el kardex de entradas se actualizaron.</div>';
@@ -101,6 +103,7 @@ $content = $flashReab.'
       <table style="min-width:100%">
         <thead>
           <tr>
+            <th>Orden de entrada</th>
             <th>Fecha</th>
             <th>Cantidad</th>
             <th>De quién llegó</th>
@@ -109,14 +112,19 @@ $content = $flashReab.'
         </thead>
         <tbody>' : '<div style="color:var(--muted);font-size:13px">Sin registro de entradas</div>').'
         
-        '.($entradas ? implode('', array_map(fn($e) => '
+        '.($entradas ? implode('', array_map(function ($e) use ($item) {
+          $num = isset($e['orden_numero']) && $e['orden_numero'] !== null
+            ? 'Orden de entrada ' . OrdenHelper::formatNumero((int)$e['orden_numero'])
+            : '—';
+          return '
           <tr>
-            <td style="font-size:12px">'.e(substr((string)($e['created_at'] ?? ''), 0, 16)).'</td>
+            <td><span class="badge"><span class="dot"></span>'.e($num).'</span></td>
+            <td>'.e(substr((string)($e['created_at'] ?? ''), 0, 16)).'</td>
             <td><strong>'.(int)$e['cantidad'].' '.e($item['unidad']).'</strong></td>
             <td>'.e($e['quien_entrego'] ?? '—').'</td>
             <td>'.e($e['quien_recibio'] ?? '—').'</td>
-          </tr>
-        ', $entradas)) : '').'
+          </tr>';
+        }, $entradas)) : '').'
         
         '.($entradas ? '</tbody>
       </table>
@@ -134,6 +142,7 @@ $content = $flashReab.'
       <table style="min-width:100%">
         <thead>
           <tr>
+            <th>Orden de salida</th>
             <th>Fecha</th>
             <th>Cantidad</th>
             <th>Quién entregó</th>
@@ -142,14 +151,19 @@ $content = $flashReab.'
         </thead>
         <tbody>' : '<div style="color:var(--muted);font-size:13px">Sin registro de salidas</div>').'
         
-        '.($salidas ? implode('', array_map(fn($s) => '
+        '.($salidas ? implode('', array_map(function ($s) use ($item) {
+          $num = isset($s['orden_numero']) && $s['orden_numero'] !== null
+            ? 'Orden de salida ' . OrdenHelper::formatNumero((int)$s['orden_numero'])
+            : '—';
+          return '
           <tr>
-            <td style="font-size:12px">'.e(substr((string)($s['created_at'] ?? ''), 0, 16)).'</td>
+            <td><span class="badge"><span class="dot warn"></span>'.e($num).'</span></td>
+            <td>'.e(substr((string)($s['created_at'] ?? ''), 0, 16)).'</td>
             <td><strong>'.(int)$s['cantidad_usada'].' '.e($item['unidad']).'</strong></td>
             <td>'.e($s['quien_entrego'] ?? '—').'</td>
             <td>'.e($s['quien_recibio'] ?? '—').'</td>
-          </tr>
-        ', $salidas)) : '').'
+          </tr>';
+        }, $salidas)) : '').'
         
         '.($salidas ? '</tbody>
       </table>

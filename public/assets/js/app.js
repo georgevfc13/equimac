@@ -274,8 +274,7 @@
     inpR.value = String(selR);
     inpC.value = String(selC);
 
-    // "Nuevo estante" (filas×columnas) usa rectángulo tipo Word; "Nuevo producto"
-    // (entrepaño×posicion) debe seguir siendo una celda única.
+    // Varios productos pueden compartir la misma celda; mostramos conteo sin bloquear.
     const isSizeMode = String(inpR.getAttribute('name') || '') === 'filas' && String(inpC.getAttribute('name') || '') === 'columnas';
 
     // Usar las dimensiones reales del estante
@@ -296,11 +295,12 @@
         btn.dataset.r = String(r);
         btn.dataset.c = String(c);
         btn.title = `Fila ${r}, Posición ${c}`;
-        
-        // Marcar si está ocupada
-        if (ocupadas && ocupadas[r] && ocupadas[r][c]) {
-          btn.classList.add('is-occupied');
-          btn.disabled = true;
+
+        if (!isSizeMode && ocupadas && ocupadas[r] && ocupadas[r][c]) {
+          const count = typeof ocupadas[r][c] === 'number' ? ocupadas[r][c] : 1;
+          btn.classList.add('is-shared');
+          btn.dataset.count = String(count);
+          btn.title = `${count} producto(s) aquí — puedes agregar otro`;
         }
         
         grid.appendChild(btn);
@@ -312,8 +312,8 @@
       cells.forEach((btn) => {
         const r = parseInt(btn.dataset.r, 10);
         const c = parseInt(btn.dataset.c, 10);
-        const isOccupied = btn.classList.contains('is-occupied');
-        const canHighlight = !isOccupied;
+        const isShared = btn.classList.contains('is-shared');
+        const canHighlight = isSizeMode ? !btn.classList.contains('is-occupied') : true;
 
         let isSelected;
         let isHover;
@@ -335,14 +335,20 @@
           const cuadros = selR * selC;
           label.textContent = `Filas: ${selR} · Paños: ${selC} · ${cuadros} cuadros`;
         } else {
-          label.textContent = `Seleccionado: Fila ${selR} · Posición ${selC}`;
+          label.textContent = `Seleccionado: Fila ${selR} · Posición ${selC}${isSharedAt(selR, selC) ? ' (celda compartida)' : ''}`;
         }
       }
     };
 
+    const isSharedAt = (r, c) => {
+      const cell = cells.find((b) => parseInt(b.dataset.r, 10) === r && parseInt(b.dataset.c, 10) === c);
+      return cell && cell.classList.contains('is-shared');
+    };
+
     grid.addEventListener('mouseover', (e) => {
       const t = e.target.closest('.table-size-picker-cell');
-      if (!t || !grid.contains(t) || t.classList.contains('is-occupied')) return;
+      if (!t || !grid.contains(t)) return;
+      if (isSizeMode && t.classList.contains('is-occupied')) return;
       hoverR = parseInt(t.dataset.r, 10);
       hoverC = parseInt(t.dataset.c, 10);
       paint();
@@ -356,7 +362,8 @@
 
     grid.addEventListener('click', (e) => {
       const t = e.target.closest('.table-size-picker-cell');
-      if (!t || !grid.contains(t) || t.classList.contains('is-occupied')) return;
+      if (!t || !grid.contains(t)) return;
+      if (isSizeMode && t.classList.contains('is-occupied')) return;
       e.preventDefault();
       selR = parseInt(t.dataset.r, 10);
       selC = parseInt(t.dataset.c, 10);
@@ -618,6 +625,24 @@
       }
     }
 
+    const banner = document.getElementById('js-stock-banner');
+    const bannerMsg = document.getElementById('js-stock-banner-msg');
+    const bannerOpen = document.getElementById('js-stock-banner-open');
+    if (banner && lowStockItems.length > 0) {
+      banner.hidden = false;
+      if (bannerMsg) {
+        bannerMsg.textContent = `${lowStockItems.length} producto(s) con stock bajo o agotado. Revisa y reabastece a tiempo.`;
+      }
+      if (bannerOpen) {
+        bannerOpen.addEventListener('click', () => {
+          setOpen(true);
+          bell?.focus();
+        });
+      }
+    } else if (banner) {
+      banner.hidden = true;
+    }
+
     if (list && empty) {
       list.innerHTML = '';
       if (!lowStockItems.length) {
@@ -662,6 +687,94 @@
     document.addEventListener('DOMContentLoaded', initStockNotifications);
   } else {
     initStockNotifications();
+  }
+
+  function initPageLoader() {
+    const loader = document.getElementById('js-page-loader');
+    if (!loader) return;
+
+    const started = Date.now();
+    const MIN_MS = 600;
+    const MAX_MS = 5000;
+
+    const hide = () => {
+      const elapsed = Date.now() - started;
+      const wait = Math.max(0, MIN_MS - elapsed);
+      setTimeout(() => {
+        loader.classList.add('is-hidden');
+        loader.setAttribute('aria-busy', 'false');
+      }, wait);
+    };
+
+    const forceTimer = setTimeout(hide, MAX_MS);
+    window.addEventListener('load', () => {
+      clearTimeout(forceTimer);
+      hide();
+    }, { once: true });
+
+    document.querySelectorAll('.nav .chip[href], .brand[href]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || e.metaKey || e.ctrlKey) return;
+        loader.classList.remove('is-hidden');
+        loader.setAttribute('aria-busy', 'true');
+      });
+    });
+  }
+
+  function initMultiLineForms() {
+    document.addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('[data-remove-line]');
+      if (removeBtn) {
+        const line = removeBtn.closest('[data-line]');
+        const container = line?.parentElement;
+        if (line && container && container.querySelectorAll('[data-line]').length > 1) {
+          line.remove();
+        }
+      }
+    });
+
+    const salidaAdd = document.getElementById('js-add-salida-line');
+    const salidaLines = document.getElementById('js-salida-lines');
+    if (salidaAdd && salidaLines) {
+      salidaAdd.addEventListener('click', () => {
+        const row = document.createElement('div');
+        row.className = 'mov-line';
+        row.dataset.line = '';
+        row.innerHTML = `
+          <div class="form-grid" style="grid-template-columns:1fr 140px auto;align-items:end">
+            <div class="field" style="margin:0">
+              <label>Código</label>
+              <input name="line_codigo[]" placeholder="EQ-001" autocomplete="off" />
+            </div>
+            <div class="field" style="margin:0">
+              <label>Cantidad</label>
+              <input type="number" min="1" name="line_cantidad[]" value="1" />
+            </div>
+            <button type="button" class="btn danger" data-remove-line title="Quitar">✕</button>
+          </div>`;
+        salidaLines.appendChild(row);
+      });
+    }
+
+    const entradaAdd = document.getElementById('js-add-entrada-line');
+    const entradaLines = document.getElementById('js-entrada-lines');
+    const entradaTpl = document.getElementById('js-entrada-line-template');
+    if (entradaAdd && entradaLines && entradaTpl) {
+      entradaAdd.addEventListener('click', () => {
+        entradaLines.appendChild(entradaTpl.content.cloneNode(true));
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initPageLoader();
+      initMultiLineForms();
+    });
+  } else {
+    initPageLoader();
+    initMultiLineForms();
   }
 })();
 

@@ -24,16 +24,7 @@ final class EstantesController
 
         $estantes = $this->estantes->all();
         $items = $this->inv->all('');
-        $map = [];
-        foreach ($items as $p) {
-            $e = (int)$p['estante'];
-            $f = (int)$p['entrepaño'];
-            $pos = (int)$p['posicion'];
-            if ($e <= 0 || $f <= 0 || $pos <= 0) {
-                continue;
-            }
-            $map[$e][$f][$pos] = $p;
-        }
+        $map = $this->buildMap($items);
 
         return Response::html(view('estantes/index', [
             'title' => 'Estantes',
@@ -104,7 +95,7 @@ final class EstantesController
             if ($e <= 0 || $f <= 0 || $pos <= 0) {
                 continue;
             }
-            $map[$e][$f][$pos] = $p;
+            $map[$e][$f][$pos][] = $p;
         }
         return $map;
     }

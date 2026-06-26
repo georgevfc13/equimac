@@ -34,6 +34,7 @@ $content = '
           <option value="all">Todos los campos</option>
           <option value="codigo">Código</option>
           <option value="nombre">Nombre</option>
+          <option value="descripcion">Descripción</option>
           <option value="marca">Marca</option>
           <option value="equipo">Equipo</option>
           <option value="tipo_maquinaria">Maquinaria</option>

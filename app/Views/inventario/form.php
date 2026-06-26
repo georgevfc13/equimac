@@ -107,7 +107,7 @@ $content .= '
 
       <div class="field" style="grid-column:1/-1">
         <label>Ubicación en el estante *</label>
-        <p class="help" style="margin-bottom:12px; font-size:13px">Haz clic en una posición disponible (azul) para seleccionarla. Las posiciones ocupadas (rojo) no se pueden seleccionar.</p>
+        <p class="help" style="margin-bottom:12px; font-size:13px">Haz clic en la celda deseada. Las celdas con productos (ámbar) pueden compartirse con más productos.</p>
         <div id="js-picker-container" style="display:none">
           <div class="table-size-picker" data-table-picker data-max="20">
             <div class="table-size-picker-grid js-picker-grid" data-grid></div>

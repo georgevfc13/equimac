@@ -43,53 +43,47 @@ final class Inventario
 
     public function all(string $q = ''): array
     {
-        if ($q === '') {
-            $stmt = $this->db->query("SELECT * FROM inventario ORDER BY estante, entrepaño, posicion, nombre, codigo");
-            return $stmt->fetchAll() ?: [];
-        }
-
-        $sql = "SELECT * FROM inventario
-                WHERE nombre LIKE :q OR marca LIKE :q OR equipo LIKE :q OR tipo_maquinaria LIKE :q
-                ORDER BY estante, entrepaño, posicion, nombre, codigo";
-        $stmt = $this->db->prepare($sql);
-        $like = '%' . $q . '%';
-        $stmt->execute([':q' => $like]);
-        return $stmt->fetchAll() ?: [];
+        return $this->search($q, 'all');
     }
 
     public function search(string $q = '', string $type = 'all'): array
     {
+        $order = ' ORDER BY estante, entrepaño, posicion, nombre, codigo';
+
         if ($q === '') {
-            $stmt = $this->db->query("SELECT * FROM inventario ORDER BY estante, entrepaño, posicion, nombre, codigo");
+            $stmt = $this->db->query('SELECT * FROM inventario' . $order);
             return $stmt->fetchAll() ?: [];
         }
 
+        $fields = match ($type) {
+            'codigo' => ['codigo'],
+            'nombre' => ['nombre'],
+            'marca' => ['marca'],
+            'equipo' => ['equipo'],
+            'tipo_maquinaria' => ['tipo_maquinaria'],
+            'descripcion' => ['descripcion'],
+            default => ['codigo', 'nombre', 'descripcion', 'marca', 'equipo', 'tipo_maquinaria'],
+        };
+
+        [$where, $params] = $this->buildLikeWhere($fields, $q);
+        $stmt = $this->db->prepare('SELECT * FROM inventario WHERE ' . $where . $order);
+        $stmt->execute($params);
+        return $stmt->fetchAll() ?: [];
+    }
+
+    /** @param list<string> $fields */
+    private function buildLikeWhere(array $fields, string $q): array
+    {
         $like = '%' . $q . '%';
-        
-        switch ($type) {
-            case 'codigo':
-                $sql = "SELECT * FROM inventario WHERE codigo LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
-                break;
-            case 'nombre':
-                $sql = "SELECT * FROM inventario WHERE nombre LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
-                break;
-            case 'marca':
-                $sql = "SELECT * FROM inventario WHERE marca LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
-                break;
-            case 'equipo':
-                $sql = "SELECT * FROM inventario WHERE equipo LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
-                break;
-            case 'tipo_maquinaria':
-                $sql = "SELECT * FROM inventario WHERE tipo_maquinaria LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
-                break;
-            default:
-                // 'all' o cualquier otro valor
-                $sql = "SELECT * FROM inventario WHERE nombre LIKE :q OR marca LIKE :q OR equipo LIKE :q OR tipo_maquinaria LIKE :q OR codigo LIKE :q ORDER BY estante, entrepaño, posicion, nombre, codigo";
+        $parts = [];
+        $params = [];
+        foreach ($fields as $i => $field) {
+            $key = ':q' . ($i + 1);
+            $parts[] = $field . ' LIKE ' . $key;
+            $params[$key] = $like;
         }
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':q' => $like]);
-        return $stmt->fetchAll() ?: [];
+        return [implode(' OR ', $parts), $params];
     }
 
     public function find(int $id): ?array
@@ -242,12 +236,17 @@ final class Inventario
         return $stmt->fetchAll() ?: [];
     }
 
+    /** @return array<int, array<int, int>> Conteo de productos por fila/posición (varios permitidos). */
     public function posicionesOcupadasPorEstante(int $estante): array
     {
-        $stmt = $this->db->prepare("SELECT DISTINCT entrepaño, posicion FROM inventario WHERE estante = :e");
+        $stmt = $this->db->prepare(
+            'SELECT entrepaño, posicion, COUNT(*) AS total
+             FROM inventario WHERE estante = :e
+             GROUP BY entrepaño, posicion'
+        );
         $stmt->execute([':e' => $estante]);
         $rows = $stmt->fetchAll() ?: [];
-        
+
         $result = [];
         foreach ($rows as $row) {
             $fila = (int)$row['entrepaño'];
@@ -255,7 +254,7 @@ final class Inventario
             if (!isset($result[$fila])) {
                 $result[$fila] = [];
             }
-            $result[$fila][$pos] = true;
+            $result[$fila][$pos] = (int)$row['total'];
         }
         return $result;
     }

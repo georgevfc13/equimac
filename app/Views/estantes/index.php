@@ -136,15 +136,21 @@ foreach (($estantes ?? []) as $e) {
     for ($f = 1; $f <= $filas; $f++) {
         $content .= '<tr><td class="mono"><strong>F'.$f.'</strong></td>';
         for ($p = 1; $p <= $cols; $p++) {
-            $prod = $map[$num][$f][$p] ?? null;
-            if ($prod) {
-                $content .= '<td>
-                  <a class="btn" style="padding:8px 10px; border-radius:14px; width:100%; justify-content:center"
-                     href="'.e(url('inventario/'.(int)$prod['id'])).'"
-                     title="'.e($prod['descripcion']).'">
+            $prods = $map[$num][$f][$p] ?? [];
+            if ($prods) {
+                $content .= '<td class="cell-multi">';
+                $count = count($prods);
+                if ($count > 1) {
+                    $content .= '<div class="cell-count-badge">'.$count.' prod.</div>';
+                }
+                foreach ($prods as $prod) {
+                    $content .= '
+                  <a class="btn cell-prod-link" href="'.e(url('inventario/'.(int)$prod['id'])).'"
+                     title="'.e($prod['descripcion'] ?? '').'">
                     <span class="mono">'.e($prod['nombre'] ?? $prod['codigo']).'</span>
-                  </a>
-                </td>';
+                  </a>';
+                }
+                $content .= '</td>';
             } else {
                 $content .= '<td><span class="badge" style="background-color:#f0f0f0; color:#666"><span class="dot good"></span>Libre</span></td>';
             }
